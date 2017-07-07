@@ -12,7 +12,7 @@ class BoxData(SyntheticData):
         super(BoxData, self).__init__(args)
         self.fg_noise = args.fg_noise
         self.bg_noise = args.bg_noise
-        self.bidirection = args.bidirection
+        self.train_images, self.test_images = None, None
 
     def generate_source_image(self):
         batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
@@ -31,7 +31,7 @@ class BoxData(SyntheticData):
         mask = numpy.expand_dims(im.sum(2) > 0, 2)
         return im, mask
 
-    def get_next_batch(self):
+    def get_next_batch(self, images=None):
         src_image, src_mask = self.generate_source_image()
         im, motion = self.generate_data(src_image, src_mask)
         return im, motion

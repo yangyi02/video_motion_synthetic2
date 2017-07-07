@@ -14,7 +14,6 @@ class MnistData(SyntheticData):
         super(MnistData, self).__init__(args)
         script_dir = os.path.dirname(__file__)  # absolute dir the script is in
         self.file_name = os.path.join(script_dir, 'mnist.h5')
-        self.bidirection = args.bidirection
         self.train_images, self.test_images = self.load_mnist()
 
     def load_mnist(self):

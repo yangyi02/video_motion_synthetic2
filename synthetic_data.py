@@ -2,7 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
 
-import visualize
+from visualizer import Visualizer
 import flowlib
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
@@ -19,6 +19,7 @@ class SyntheticData(object):
         self.bg_move = args.bg_move
         self.bg_noise = args.bg_noise
         self.m_dict, self.reverse_m_dict, self.m_kernel = self.motion_dict()
+        self.visualizer = Visualizer(args)
 
     def motion_dict(self):
         m_range = self.m_range
@@ -168,26 +169,24 @@ class SyntheticData(object):
         return im_new
 
     def display(self, im, motion):
-        num_frame, m_range = self.num_frame, self.m_range
-        im_width, im_height = self.im_size, self.im_size
-        reverse_m_dict = self.reverse_m_dict
-        width, height = visualize.get_img_size(3, num_frame, im_width, im_height)
+        num_frame = self.num_frame
+        width, height = self.visualizer.get_img_size(3, num_frame)
         img = numpy.ones((height, width, 3))
         prev_im = None
         for i in range(num_frame):
             curr_im = im[i, 0, :, :, :].squeeze().transpose(1, 2, 0)
-            x1, y1, x2, y2 = visualize.get_img_coordinate(1, i+1, im_width, im_height)
+            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(1, i+1)
             img[y1:y2, x1:x2, :] = curr_im
 
             if i > 0:
                 im_diff = abs(curr_im - prev_im)
-                x1, y1, x2, y2 = visualize.get_img_coordinate(2, i+1, im_width, im_height)
+                x1, y1, x2, y2 = self.visualizer.get_img_coordinate(2, i+1)
                 img[y1:y2, x1:x2, :] = im_diff
             prev_im = curr_im
 
-            flow = visualize.label2motion(motion[i, 0, :, :, :].squeeze(), reverse_m_dict)
-            optical_flow = flowlib.visualize_flow(flow, m_range)
-            x1, y1, x2, y2 = visualize.get_img_coordinate(3, i+1, im_width, im_height)
+            flow = self.visualizer.label2motion(motion[i, 0, :, :, :].squeeze())
+            optical_flow = flowlib.visualize_flow(flow, self.m_range)
+            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(3, i+1)
             img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
         if True:

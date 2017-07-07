@@ -1,14 +1,10 @@
-import os
+from visualize import get_img_size, get_img_coordinate, label2motion
+from flowlib import visualize_flow
+
 import numpy
 import matplotlib.pyplot as plt
-from skimage import io, transform
-import pickle
 from PIL import Image
-import h5py
-import learning_args
-import visualize
 import logging
-
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                     level=logging.INFO)
 
@@ -19,7 +15,7 @@ class SyntheticData(object):
         self.num_objects = args.num_objects
         self.im_size = args.image_size
         self.m_range = args.motion_range
-        self.num_inputs = args.num_inputs
+        self.num_frame = args.num_frame
         self.bg_move = args.bg_move
         self.bg_noise = args.bg_noise
         self.m_dict, self.reverse_m_dict, self.m_kernel = self.motion_dict()
@@ -38,175 +34,167 @@ class SyntheticData(object):
             m_kernel[:, i, m_y[i] + m_range, m_x[i] + m_range] = 1
         return m_dict, reverse_m_dict, m_kernel
 
-    def generate_data(self, source_image):
-        batch_size, im_size, num_inputs = self.batch_size, self.im_size, self.num_inputs
+    def generate_data(self, src_image, src_mask):
+        batch_size, im_size, num_frame = self.batch_size, self.im_size, self.num_frame
         m_dict = self.m_dict
         # generate foreground motion
-        m_label, m_x, m_y = self.generate_motion(self.num_objects)
+        src_motion, m_x, m_y = self.generate_motion(self.num_objects, src_mask)
         # move foreground
-        fg_im, fg_motion = self.move_foreground(source_image, m_label, m_x, m_y)
+        fg_im, fg_motion, fg_mask = self.move_foreground(src_image, src_mask, src_motion, m_x, m_y)
         # generate background
-        source_bg = numpy.random.rand(batch_size, 3, im_size, im_size) * self.bg_noise
+        src_bg = numpy.random.rand(batch_size, 3, im_size, im_size) * self.bg_noise
         # generate background motion
         if self.bg_move:
-            # move background
-            m_x, m_y = self.generate_motion(num_objects=1)
-            bg_im, bg_motion = self.move_background(source_bg, m_x, m_y)
+            bg_motion, m_x, m_y = self.generate_motion(num_objects=1)
         else:
-            # does not move background
-            bg_motion = m_dict[(0, 0)] * numpy.ones(num_inputs + 1, batch_size, 1, im_size, im_size)
-            bg_im = numpy.zeros((num_inputs + 1, batch_size, 3, im_size, im_size))
-            for i in range(self.num_inputs):
-                bg_im[i, :, :, :, :] = source_bg
+            bg_motion = m_dict[(0, 0)] * numpy.ones((1, batch_size, 1, im_size, im_size))
+            m_x = numpy.zeros((1, batch_size)).astype(int)
+            m_y = numpy.zeros((1, batch_size)).astype(int)
+        # move background
+        bg_im, bg_motion = self.move_background(src_bg, bg_motion, m_x, m_y)
         # merge foreground and background, merge foreground motion and background motion
-        for i in range(self.num_inputs):
-            mask = numpy.expand_dims(fg_im[i, :, :, :, :].sum(2), 1) == 0
-            fg_motion[i, mask] = bg_motion[i, mask]
-            fg_im[i, mask] = bg_im[i, mask]
-        im_input = fg_im[:-1, :, :, :, :].reshape()
-        im_output = fg_im[-1, :, :, :, :]
-        gt_motion = fg_motion[-1, :, :, :, :]
-        return im_input, im_output, gt_motion.astype(int)
+        fg_motion[fg_mask == 0] = bg_motion[fg_mask == 0]
+        fg_im[fg_mask.repeat(3, 2) == 0] = bg_im[fg_mask.repeat(3, 2) == 0]
+        return fg_im, fg_motion.astype(int)
 
-    def generate_motion(self, num_objects):
+    def generate_motion(self, num_objects, src_mask=None):
         batch_size, im_size = self.batch_size, self.im_size
         m_dict, reverse_m_dict = self.m_dict, self.reverse_m_dict
-        m_label = numpy.random.randint(0, len(m_dict), size=(batch_size, num_objects))
-        m_x = numpy.zeros((batch_size, num_objects)).astype(int)
-        m_y = numpy.zeros((batch_size, num_objects)).astype(int)
-        for i in range(batch_size):
-            for j in range(num_objects):
+        m_label = numpy.random.randint(0, len(m_dict), size=(num_objects, batch_size))
+        src_motion = m_dict[(0, 0)] * numpy.ones((num_objects, batch_size, 1, im_size, im_size))
+        if src_mask is None:
+            src_mask = numpy.ones((num_objects, batch_size, 1, im_size, im_size))
+        for i in range(num_objects):
+            for j in range(batch_size):
+                mask = src_mask[i, j, :, :, :] > 0
+                src_motion[i, j, mask] = m_label[i, j]
+        m_x = numpy.zeros((num_objects, batch_size)).astype(int)
+        m_y = numpy.zeros((num_objects, batch_size)).astype(int)
+        for i in range(num_objects):
+            for j in range(batch_size):
                 (m_x[i, j], m_y[i, j]) = reverse_m_dict[m_label[i, j]]
-        return m_label, m_x, m_y
+        return src_motion, m_x, m_y
 
-    def move_foreground(self, source_image, m_label, m_x, m_y):
-        batch_size, num_inputs, im_size = self.batch_size, self.num_inputs, self.im_size
-        im = numpy.zeros(num_inputs + 1, batch_size, 3, im_size, im_size)
-        motion = numpy.zeros(num_inputs + 1, batch_size, 1, im_size, im_size)
-        for i in range(num_inputs):
-            im[i, :, :, :, :] = self.merge_objects(source_image)
-            source_image = move_source_image(source_image, m_x, m_y)
-            motion[i, :, :, :, :] = self.merge_motion(m_label)
-        return im, motion
+    def move_foreground(self, src_image, src_mask, src_motion, m_x, m_y):
+        batch_size, num_frame, im_size = self.batch_size, self.num_frame, self.im_size
+        im = numpy.zeros((num_frame, batch_size, 3, im_size, im_size))
+        motion = numpy.zeros((num_frame, batch_size, 1, im_size, im_size))
+        mask = numpy.zeros((num_frame, batch_size, 1, im_size, im_size))
+        for i in range(num_frame):
+            im[i, ...], motion[i, ...], mask[i, ...] = self.merge_objects(src_image, src_motion,
+                                                                          src_mask)
+            src_image = self.move_image_fg(src_image, m_x, m_y)
+            src_motion = self.move_motion(src_motion, m_x, m_y)
+            src_mask = self.move_mask(src_mask, m_x, m_y)
+        return im, motion, mask
 
-
-    def generate_bidirectional_data(self, im3):
-        # generate foreground motion
-        m_f_x, m_f_y, m_mask_f, m_b_x, m_b_y, m_mask_b = self.generate_motion(self.num_objects)
-        m_b_x, m_b_y, m_mask_b = self.reverse_motion(m_f_x, m_f_y, m_mask_f)
-        # move foreground
-        im1, im2, im4, im5 = self.move_foreground(im3, m_f_x, m_f_y, m_b_x, m_b_y)
-        # generate background
-        bg3 = numpy.random.rand(batch_size, 3, im_size, im_size) * self.bg_noise
-        # generate background motion
-        if self.bg_move:
-            m_f_x, m_f_y, m_mask_f, m_b_x, m_b_y, m_mask_b = self.generate_motion(num_objects=1)
-            # move background
-            bg1, bg2, bg4, bg5 = self.move_background(bg3, m_f_x, m_f_y, m_b_x, m_b_y)
-        else:
-            bg_mask_f = m_dict[(0, 0)] * numpy.ones(batch_size, 1, im_size, im_size)
-            bg_mask_b = m_dict[(0, 0)] * numpy.ones(batch_size, 1, im_size, im_size)
-            bg1, bg2, bg4, bg5 = bg3, bg3, bg3, bg3
-
-        # generate final image and ground truth motion
-        final_im1 = self.merge_objects(im1)
-
-        final_im1 = numpy.zeros((batch_size, 3, im_size, im_size))
-        final_im2 = numpy.zeros((batch_size, 3, im_size, im_size))
-        final_im3 = numpy.zeros((batch_size, 3, im_size, im_size))
-        final_im4 = numpy.zeros((batch_size, 3, im_size, im_size))
-        final_im5 = numpy.zeros((batch_size, 3, im_size, im_size))
-        gt_motion_f = numpy.zeros((batch_size, 1, im_size, im_size))
-        gt_motion_b = numpy.zeros((batch_size, 1, im_size, im_size))
-        for i in range(batch_size):
-            for j in range(num_objects):
-                final_im1[i, j, :, :, :] += im1[i, j, :, :, :] * mask
-
-                mask = numpy.expand_dims(im2[i, j, :, :, :].sum(2), 1) == 0
-                gt_motion_f[mask] = m_mask_f[i, j, :, :, :] * mask
-                mask = numpy.expand_dims(im4[:, j, :, :, :].sum(2), 1) == 0
-                gt_motion_b[mask] = m_mask_b[i, j, :, :, :] * mask
-        mask = numpy.expand_dims(final_im2.sum(1), 1) == 0
-        gt_motion_f[mask] = bg_mask_f[mask]
-        mask = numpy.expand_dims(final_im4.sum(1), 1) == 0
-        gt_motion_b[mask] = bg_mask_b[mask]
-        final_im1[final_im1 == 0] = bg1[final_im1 == 0]
-        final_im2[final_im2 == 0] = bg2[final_im2 == 0]
-        final_im3[final_im3 == 0] = bg3[final_im3 == 0]
-        final_im4[final_im4 == 0] = bg4[final_im4 == 0]
-        final_im5[final_im5 == 0] = bg5[final_im5 == 0]
-
-        im_input_f = numpy.concatenate((im1, im2), 1)
-        im_input_b = numpy.concatenate((im5, im4), 1)
-        im_output = im3
-        if self.bidirection:
-            return im_input_f, im_input_b, im_output, gt_motion_f.astype(int), gt_motion_b.astype(
-                int)
-        else:
-            return im_input_f, im_output, gt_motion_f.astype(int)
-        return final_im1, final_im2, final_im3,
-
-    def generate_motion_old(self, num_objects):
-        batch_size, im_size = self.batch_size, self.im_size
-        m_dict, reverse_m_dict = self.m_dict, self.reverse_m_dict
-        m_label = numpy.random.randint(0, len(m_dict), size=(batch_size, num_objects))
-        m_f_x = numpy.zeros((batch_size, num_objects)).astype(int)
-        m_f_y = numpy.zeros((batch_size, num_objects)).astype(int)
-        m_b_x = numpy.zeros((batch_size, num_objects)).astype(int)
-        m_b_y = numpy.zeros((batch_size, num_objects)).astype(int)
-        for i in range(batch_size):
-            for j in range(num_objects):
-                (m_f_x[i, j], m_f_y[i, j]) = reverse_m_dict[m_label[i, j]]
-                (m_b_x[i, j], m_b_y[i, j]) = (-m_f_x[i, j], -m_f_y[i, j])
-        m_mask_f = numpy.zeros((batch_size, num_objects, im_size, im_size))
-        m_mask_b = numpy.zeros((batch_size, num_objects, im_size, im_size))
-        for i in range(batch_size):
-            for j in range(num_objects):
-                m_mask_f[i, j, :, :] = m_label[i, j]
-                m_mask_b[i, j, :, :] = m_dict[(m_b_x[i, j], m_b_y[i, j])]
-        return m_f_x, m_f_y, m_mask_f, m_b_x, m_b_y, m_mask_b
-
-    def move_foreground_old(self, im3, m_f_x, m_f_y, m_b_x, m_b_y):
-        im2 = self.move_image_fg(im3, m_b_x, m_b_y)
-        im1 = self.move_image_fg(im2, m_b_x, m_b_y)
-        im4 = self.move_image_fg(im3, m_f_x, m_f_y)
-        im5 = self.move_image_fg(im4, m_f_x, m_f_y)
-        return im1, im2, im4, im5
+    def merge_objects(self, src_image, src_motion, src_mask):
+        batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
+        im = numpy.zeros((batch_size, 3, im_size, im_size))
+        motion = numpy.zeros((batch_size, 1, im_size, im_size))
+        mask = numpy.zeros((batch_size, 1, im_size, im_size))
+        for i in range(num_objects):
+            im[mask.repeat(3, 1) == 0] = src_image[i, mask.repeat(3, 1) == 0]
+            motion[mask == 0] = src_motion[i, mask == 0]
+            mask[mask == 0] = src_mask[i, mask == 0]
+        return im, motion, mask
 
     def move_image_fg(self, im, m_x, m_y):
-        batch_size, num_objects, im_size, m_range = \
-            self.batch_size, self.num_objects, self.im_size, self.m_range
+        batch_size, im_size, m_range = self.batch_size, self.im_size, self.m_range
+        num_objects = self.num_objects
         im_big = numpy.zeros(
-            (batch_size, num_objects, 3, im_size + m_range * 2, im_size + m_range * 2))
-        im_big[:, :, m_range:-m_range, m_range:-m_range] = im
-        im_new = numpy.zeros((batch_size, num_objects, 3, im_size, im_size))
-        for i in range(batch_size):
-            for j in range(num_objects):
+            (num_objects, batch_size, 3, im_size + m_range * 2, im_size + m_range * 2))
+        im_big[:, :, :, m_range:-m_range, m_range:-m_range] = im
+        im_new = numpy.zeros((num_objects, batch_size, 3, im_size, im_size))
+        for i in range(num_objects):
+            for j in range(batch_size):
                 x = m_range + m_x[i, j]
                 y = m_range + m_y[i, j]
                 im_new[i, j, :, :, :] = im_big[i, j, :, y:y + im_size, x:x + im_size]
         return im_new
 
-    def move_background(self, bg3, m_f_x, m_f_y, m_b_x, m_b_y):
-        bg2 = self.move_image_bg(bg3, m_b_x, m_b_y)
-        bg1 = self.move_image_bg(bg2, m_b_x, m_b_y)
-        bg4 = self.move_image_bg(bg3, m_f_x, m_f_y)
-        bg5 = self.move_image_bg(bg4, m_f_x, m_f_y)
-        return bg1, bg2, bg4, bg5
+    def move_motion(self, motion, m_x, m_y):
+        batch_size, im_size, m_range = self.batch_size, self.im_size, self.m_range
+        num_objects = self.num_objects
+        m_dict = self.m_dict
+        motion_big = m_dict[(0, 0)] * numpy.ones(
+            (num_objects, batch_size, 1, im_size + m_range * 2, im_size + m_range * 2))
+        motion_big[:, :, :, m_range:-m_range, m_range:-m_range] = motion
+        motion_new = numpy.zeros((num_objects, batch_size, 1, im_size, im_size))
+        for i in range(num_objects):
+            for j in range(batch_size):
+                x = m_range + m_x[i, j]
+                y = m_range + m_y[i, j]
+                motion_new[i, j, :, :, :] = motion_big[i, j, :, y:y + im_size, x:x + im_size]
+        return motion_new
 
-    def move_image_bg(self, im, m_x, m_y):
-        batch_size, im_size, m_range, bg_noise = \
-            self.batch_size, self.im_size, self.m_range, self.bg_noise
-        im_big = numpy.random.rand(batch_size, 3, im_size + m_range * 2, im_size + m_range * 2) \
-            * bg_noise
-        im_big[:, :, m_range:-m_range, m_range:-m_range] = im
+    def move_mask(self, mask, m_x, m_y):
+        batch_size, im_size, m_range = self.batch_size, self.im_size, self.m_range
+        num_objects = self.num_objects
+        mask_big = numpy.zeros(
+            (num_objects, batch_size, 1, im_size + m_range * 2, im_size + m_range * 2))
+        mask_big[:, :, :, m_range:-m_range, m_range:-m_range] = mask
+        mask_new = numpy.zeros((num_objects, batch_size, 1, im_size, im_size))
+        for i in range(num_objects):
+            for j in range(batch_size):
+                x = m_range + m_x[i, j]
+                y = m_range + m_y[i, j]
+                mask_new[i, j, :, :, :] = mask_big[i, j, :, y:y + im_size, x:x + im_size]
+        return mask_new
+
+    def move_background(self, src_image, src_motion, m_x, m_y):
+        batch_size, num_frame, im_size = self.batch_size, self.num_frame, self.im_size
+        im = numpy.zeros((num_frame, batch_size, 3, im_size, im_size))
+        motion = numpy.zeros((num_frame, batch_size, 1, im_size, im_size))
+        for i in range(num_frame):
+            im[i, :, :, :, :] = src_image
+            src_image = self.move_image_bg(src_image, m_x, m_y)
+            motion[i, :, :, :, :] = src_motion
+        return im, motion
+
+    def move_image_bg(self, bg_im, m_x, m_y):
+        batch_size, im_size, m_range = self.batch_size, self.im_size, self.m_range
+        bg_noise = self.bg_noise
+        im_big = numpy.random.rand(batch_size, 3, im_size + m_range * 2,
+                                   im_size + m_range * 2) * bg_noise
+        im_big[:, :, m_range:-m_range, m_range:-m_range] = bg_im
         im_new = numpy.zeros((batch_size, 3, im_size, im_size))
         for i in range(batch_size):
-            x = m_range + m_x[i]
-            y = m_range + m_y[i]
+            x = m_range + m_x[0, i]
+            y = m_range + m_y[0, i]
             im_new[i, :, :, :] = im_big[i, :, y:y + im_size, x:x + im_size]
         return im_new
 
-    def merge_objects(im):
-        [batch_size, num_objects, _, im_size, _] = im.shape
-        final_im = numpy.zeros((batch_size, 3, im_size, im_size))
+    def visualize(self, im, motion):
+        num_frame, m_range = self.num_frame, self.m_range
+        im_width, im_height = self.im_size, self.im_size
+        reverse_m_dict = self.reverse_m_dict
+        width, height = get_img_size(3, num_frame, im_width, im_height)
+        img = numpy.ones((height, width, 3))
+        prev_im = None
+        for i in range(num_frame):
+            curr_im = im[i, 0, :, :, :].squeeze().transpose(1, 2, 0)
+            x1, y1, x2, y2 = get_img_coordinate(1, i+1, im_width, im_height)
+            img[y1:y2, x1:x2, :] = curr_im
+
+            if i > 0:
+                im_diff = abs(curr_im - prev_im)
+                x1, y1, x2, y2 = get_img_coordinate(2, i+1, im_width, im_height)
+                img[y1:y2, x1:x2, :] = im_diff
+            prev_im = curr_im
+
+            flow = label2motion(motion[i, 0, :, :, :].squeeze(), reverse_m_dict)
+            optical_flow = visualize_flow(flow, m_range)
+            x1, y1, x2, y2 = get_img_coordinate(3, i+1, im_width, im_height)
+            img[y1:y2, x1:x2, :] = optical_flow / 255.0
+
+        if True:
+            plt.figure(1)
+            plt.imshow(img)
+            plt.axis('off')
+            plt.show()
+        else:
+            img = img * 255.0
+            img = img.astype(numpy.uint8)
+            img = Image.fromarray(img)
+            img.save('tmp.png')

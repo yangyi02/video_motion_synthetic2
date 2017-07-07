@@ -76,7 +76,7 @@ def flow_to_image(flow, max_flow=None):
     else:
         maxrad = numpy.sqrt(max_flow ** 2 + max_flow ** 2)
 
-    print "max flow: %.4f\nflow range:\nu = %.3f .. %.3f\nv = %.3f .. %.3f" % (maxrad, minu, maxu, minv, maxv)
+    # print "max flow: %.4f\nflow range:\nu = %.3f .. %.3f\nv = %.3f .. %.3f" % (maxrad, minu, maxu, minv, maxv)
 
     u = u/(maxrad + numpy.finfo(float).eps)
     v = v/(maxrad + numpy.finfo(float).eps)

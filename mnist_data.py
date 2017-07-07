@@ -1,13 +1,9 @@
+from synthetic_data import SyntheticData
+import learning_args
+
 import os
 import numpy
-import matplotlib.pyplot as plt
-from skimage import io, transform
-import pickle
-from PIL import Image
 import h5py
-import learning_args
-import visualize
-from synthetic_data import SyntheticData
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
@@ -41,14 +37,22 @@ class MnistData(SyntheticData):
                 x = numpy.random.randint(0, im_size - width)
                 y = numpy.random.randint(0, im_size - height)
                 im[i, j, :, y:y+height, x:x+width] = mnist_im[j, :, :, :]
-        return im
+        mask = numpy.expand_dims(im.sum(2) > 0, 2)
+        return im, mask
 
     def get_next_batch(self, images):
-        source_image = self.generate_source_image(images)
-        if self.bidirection:
-            im_input_f, im_input_b, im_output, gt_motion_f, gt_motion_b = self.generate_bidirectional_data(source_image)
-            return im_input_f, im_input_b, im_output, gt_motion_f, gt_motion_b
-        else:
-            im_input, im_output, gt_motion = self.generate_data(source_image)
-            return im_input, im_output, gt_motion
+        src_image, src_mask = self.generate_source_image(images)
+        im, motion = self.generate_data(src_image, src_mask)
+        return im, motion
+
+
+def unit_test():
+    args = learning_args.parse_args()
+    logging.info(args)
+    data = MnistData(args)
+    im, motion = data.get_next_batch(data.train_images)
+    data.visualize(im, motion)
+
+if __name__ == '__main__':
+    unit_test()
 

@@ -1,13 +1,7 @@
-import os
-import numpy
-import matplotlib.pyplot as plt
-from skimage import io, transform
-import pickle
-from PIL import Image
-import h5py
-import learning_args
-import visualize
 from synthetic_data import SyntheticData
+import learning_args
+
+import numpy
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
@@ -34,14 +28,22 @@ class BoxData(SyntheticData):
                     im[i, j, k, y:y+height, x:x+width] = color[k]
                 noise = numpy.random.rand(3, height, width) * self.fg_noise
                 im[i, j, :, y:y+height, x:x+width] = im[i, j, :, y:y+height, x:x+width] + noise
-        return im
+        mask = numpy.expand_dims(im.sum(2) > 0, 2)
+        return im, mask
 
-    def get_next_batch(self, images):
-        source_image = self.generate_source_image(images)
-        if self.bidirection:
-            im_input_f, im_input_b, im_output, gt_motion_f, gt_motion_b = self.generate_bidirectional_data(source_image)
-            return im_input_f, im_input_b, im_output, gt_motion_f, gt_motion_b
-        else:
-            im_input, im_output, gt_motion = self.generate_data(source_image)
-            return im_input, im_output, gt_motion
+    def get_next_batch(self):
+        src_image, src_mask = self.generate_source_image()
+        im, motion = self.generate_data(src_image, src_mask)
+        return im, motion
+
+
+def unit_test():
+    args = learning_args.parse_args()
+    logging.info(args)
+    data = BoxData(args)
+    im, motion = data.get_next_batch()
+    data.visualize(im, motion)
+
+if __name__ == '__main__':
+    unit_test()
 

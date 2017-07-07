@@ -26,7 +26,7 @@ def parse_args():
     arg_parser.add_argument('--batch_size', type=int, default=32)
     arg_parser.add_argument('--image_size', type=int, default=32)
     arg_parser.add_argument('--motion_range', type=int, default=1)
-    arg_parser.add_argument('--num_inputs', type=int, default=2)
+    arg_parser.add_argument('--num_frame', type=int, default=2)
 
     arg_parser.add_argument('--data', default='box')
     arg_parser.add_argument('--num_objects', type=int, default=1)

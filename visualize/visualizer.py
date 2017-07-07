@@ -5,11 +5,12 @@ from PIL import Image
 
 
 class Visualizer(object):
-    def __init__(self, args):
-        self.reverse_m_dict = args.reverse_m_dict
-        self.m_range = args.m_range
+    def __init__(self, args, reverse_m_dict):
+        self.reverse_m_dict = reverse_m_dict
+        self.m_range = args.motion_range
         self.im_height = args.image_size
         self.im_width = args.image_size
+        self.num_frame = args.num_frame
 
     def visualize_result(self, im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear):
         img = self.visualize(im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear)
@@ -25,11 +26,11 @@ class Visualizer(object):
             img.save('tmp.png')
 
     def visualize(self, im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear):
-        width, height = self.get_img_size(4, 5)
+        width, height = self.get_img_size(3, max(self.num_frame + 1, 4))
         img = numpy.ones((height, width, 3))
         prev_im = None
-        for i in range(im_input.size(1)):
-            curr_im = im_input[0, i, :, :, :].squeeze().transpose(1, 2, 0)
+        for i in range(self.num_frame - 1):
+            curr_im = im_input[0, i*3:(i+1)*3, :, :].cpu().data.numpy().transpose(1, 2, 0)
             x1, y1, x2, y2 = self.get_img_coordinate(1, i+1)
             img[y1:y2, x1:x2, :] = curr_im
 
@@ -40,11 +41,21 @@ class Visualizer(object):
             prev_im = curr_im
 
         im_output = im_output[0].cpu().data.numpy().transpose(1, 2, 0)
-        x1, y1, x2, y2 = self.get_img_coordinate(1, im_input.size(1) + 1)
+        x1, y1, x2, y2 = self.get_img_coordinate(1, self.num_frame)
         img[y1:y2, x1:x2, :] = im_output
 
         im_diff = numpy.abs(im_output - prev_im)
-        x1, y1, x2, y2 = self.get_img_coordinate(2, im_input.size(1) + 1)
+        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame)
+        img[y1:y2, x1:x2, :] = im_diff
+
+        pred = im_pred[0].cpu().data.numpy().transpose(1, 2, 0)
+        # pred[pred > 1] = 1
+        # pred[pred < 0] = 0
+        x1, y1, x2, y2 = self.get_img_coordinate(1, self.num_frame + 1)
+        img[y1:y2, x1:x2, :] = pred
+
+        im_diff = numpy.abs(pred - im_output)
+        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame + 1)
         img[y1:y2, x1:x2, :] = im_diff
 
         pred_motion = pred_motion[0].cpu().data.numpy().transpose(1, 2, 0)
@@ -61,7 +72,7 @@ class Visualizer(object):
         disappear = disappear[0].cpu().data.numpy().squeeze()
         cmap = plt.get_cmap('jet')
         disappear = cmap(disappear)[:, :, 0:3]
-        x1, y1, x2, y2 = self.get_img_coordinate(3, 4)
+        x1, y1, x2, y2 = self.get_img_coordinate(3, 3)
         img[y1:y2, x1:x2, :] = disappear
 
         appear = appear[0].cpu().data.numpy().squeeze()
@@ -69,16 +80,6 @@ class Visualizer(object):
         appear = cmap(appear)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(3, 4)
         img[y1:y2, x1:x2, :] = appear
-
-        pred = im_pred[0].cpu().data.numpy().transpose(1, 2, 0)
-        pred[pred > 1] = 1
-        pred[pred < 0] = 0
-        x1, y1, x2, y2 = self.get_img_coordinate(3, 3)
-        img[y1:y2, x1:x2, :] = pred
-
-        im_diff = numpy.abs(pred - im_output)
-        x1, y1, x2, y2 = self.get_img_coordinate(4, 3)
-        img[y1:y2, x1:x2, :] = im_diff
 
         return img
 

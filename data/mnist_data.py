@@ -19,9 +19,11 @@ class MnistData(SyntheticData):
     def load_mnist(self):
         f = h5py.File(self.file_name)
         train_images = f['train'].value.reshape(-1, 28, 28)
-        train_images = numpy.expand_dims(train_images, 1).repeat(3, 1)
+        train_images = numpy.expand_dims(train_images, 1)
+        train_images = numpy.concatenate((train_images, train_images, train_images), 1)
         test_images = f['test'].value.reshape(-1, 28, 28)
-        test_images = numpy.expand_dims(test_images, 1).repeat(3, 1)
+        test_images = numpy.expand_dims(test_images, 1)
+        test_images = numpy.concatenate((test_images, test_images, test_images), 1)
         return train_images, test_images
 
     def generate_source_image(self, images):

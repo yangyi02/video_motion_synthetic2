@@ -2,8 +2,10 @@ import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from visualizer import Visualizer
-import flowlib
+import sys
+sys.path.append('..')
+from visualize.visualizer import Visualizer
+from visualize import flowlib
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                     level=logging.INFO)
@@ -19,7 +21,7 @@ class SyntheticData(object):
         self.bg_move = args.bg_move
         self.bg_noise = args.bg_noise
         self.m_dict, self.reverse_m_dict, self.m_kernel = self.motion_dict()
-        self.visualizer = Visualizer(args)
+        self.visualizer = Visualizer(args, self.reverse_m_dict)
 
     def motion_dict(self):
         m_range = self.m_range
@@ -54,9 +56,13 @@ class SyntheticData(object):
         # move background
         bg_im, bg_motion = self.move_background(src_bg, bg_motion, m_x, m_y)
         # merge foreground and background, merge foreground motion and background motion
-        fg_motion[fg_mask == 0] = bg_motion[fg_mask == 0]
-        fg_im[fg_mask.repeat(3, 2) == 0] = bg_im[fg_mask.repeat(3, 2) == 0]
-        return fg_im, fg_motion.astype(int)
+        mask = fg_mask == 0
+        fg_motion[mask] = bg_motion[mask]
+        im_mask = numpy.concatenate((mask, mask, mask), 2)
+        fg_im[im_mask] = bg_im[im_mask]
+        # swap axes between bacth size and frame
+        im, motion = fg_im.swapaxes(0, 1), fg_motion.swapaxes(0, 1)
+        return im, motion.astype(int)
 
     def generate_motion(self, num_objects, src_mask=None):
         batch_size, im_size = self.batch_size, self.im_size
@@ -96,8 +102,8 @@ class SyntheticData(object):
         mask = numpy.zeros((batch_size, 1, im_size, im_size))
         for i in range(num_objects):
             zero_mask = mask == 0
-            repeat_zero_mask = zero_mask.repeat(3, 1)
-            im[repeat_zero_mask] = src_image[i, repeat_zero_mask]
+            zero_im_mask = numpy.concatenate((zero_mask, zero_mask, zero_mask), 1)
+            im[zero_im_mask] = src_image[i, zero_im_mask]
             motion[zero_mask] = src_motion[i, zero_mask]
             mask[zero_mask] = src_mask[i, zero_mask]
         return im, motion, mask
@@ -174,19 +180,19 @@ class SyntheticData(object):
         img = numpy.ones((height, width, 3))
         prev_im = None
         for i in range(num_frame):
-            curr_im = im[i, 0, :, :, :].squeeze().transpose(1, 2, 0)
-            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(1, i+1)
+            curr_im = im[0, i, :, :, :].squeeze().transpose(1, 2, 0)
+            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(1, i + 1)
             img[y1:y2, x1:x2, :] = curr_im
 
             if i > 0:
                 im_diff = abs(curr_im - prev_im)
-                x1, y1, x2, y2 = self.visualizer.get_img_coordinate(2, i+1)
+                x1, y1, x2, y2 = self.visualizer.get_img_coordinate(2, i + 1)
                 img[y1:y2, x1:x2, :] = im_diff
             prev_im = curr_im
 
-            flow = self.visualizer.label2motion(motion[i, 0, :, :, :].squeeze())
+            flow = self.visualizer.label2motion(motion[0, i, :, :, :].squeeze())
             optical_flow = flowlib.visualize_flow(flow, self.m_range)
-            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(3, i+1)
+            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(3, i + 1)
             img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
         if True:

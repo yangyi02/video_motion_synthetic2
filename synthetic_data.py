@@ -1,9 +1,9 @@
-from visualize import get_img_size, get_img_coordinate, label2motion
-from flowlib import visualize_flow
-
 import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
+
+import visualize
+import flowlib
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                     level=logging.INFO)
@@ -94,9 +94,11 @@ class SyntheticData(object):
         motion = numpy.zeros((batch_size, 1, im_size, im_size))
         mask = numpy.zeros((batch_size, 1, im_size, im_size))
         for i in range(num_objects):
-            im[mask.repeat(3, 1) == 0] = src_image[i, mask.repeat(3, 1) == 0]
-            motion[mask == 0] = src_motion[i, mask == 0]
-            mask[mask == 0] = src_mask[i, mask == 0]
+            zero_mask = mask == 0
+            repeat_zero_mask = zero_mask.repeat(3, 1)
+            im[repeat_zero_mask] = src_image[i, repeat_zero_mask]
+            motion[zero_mask] = src_motion[i, zero_mask]
+            mask[zero_mask] = src_mask[i, zero_mask]
         return im, motion, mask
 
     def move_image_fg(self, im, m_x, m_y):
@@ -165,27 +167,27 @@ class SyntheticData(object):
             im_new[i, :, :, :] = im_big[i, :, y:y + im_size, x:x + im_size]
         return im_new
 
-    def visualize(self, im, motion):
+    def display(self, im, motion):
         num_frame, m_range = self.num_frame, self.m_range
         im_width, im_height = self.im_size, self.im_size
         reverse_m_dict = self.reverse_m_dict
-        width, height = get_img_size(3, num_frame, im_width, im_height)
+        width, height = visualize.get_img_size(3, num_frame, im_width, im_height)
         img = numpy.ones((height, width, 3))
         prev_im = None
         for i in range(num_frame):
             curr_im = im[i, 0, :, :, :].squeeze().transpose(1, 2, 0)
-            x1, y1, x2, y2 = get_img_coordinate(1, i+1, im_width, im_height)
+            x1, y1, x2, y2 = visualize.get_img_coordinate(1, i+1, im_width, im_height)
             img[y1:y2, x1:x2, :] = curr_im
 
             if i > 0:
                 im_diff = abs(curr_im - prev_im)
-                x1, y1, x2, y2 = get_img_coordinate(2, i+1, im_width, im_height)
+                x1, y1, x2, y2 = visualize.get_img_coordinate(2, i+1, im_width, im_height)
                 img[y1:y2, x1:x2, :] = im_diff
             prev_im = curr_im
 
-            flow = label2motion(motion[i, 0, :, :, :].squeeze(), reverse_m_dict)
-            optical_flow = visualize_flow(flow, m_range)
-            x1, y1, x2, y2 = get_img_coordinate(3, i+1, im_width, im_height)
+            flow = visualize.label2motion(motion[i, 0, :, :, :].squeeze(), reverse_m_dict)
+            optical_flow = flowlib.visualize_flow(flow, m_range)
+            x1, y1, x2, y2 = visualize.get_img_coordinate(3, i+1, im_width, im_height)
             img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
         if True:

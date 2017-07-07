@@ -1,9 +1,9 @@
-from synthetic_data import SyntheticData
-import learning_args
-
 import os
 import numpy
 import h5py
+
+from synthetic_data import SyntheticData
+import learning_args
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
@@ -51,7 +51,7 @@ def unit_test():
     logging.info(args)
     data = MnistData(args)
     im, motion = data.get_next_batch(data.train_images)
-    data.visualize(im, motion)
+    data.display(im, motion)
 
 if __name__ == '__main__':
     unit_test()

@@ -1,7 +1,7 @@
+import numpy
+
 from synthetic_data import SyntheticData
 import learning_args
-
-import numpy
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
@@ -42,7 +42,7 @@ def unit_test():
     logging.info(args)
     data = BoxData(args)
     im, motion = data.get_next_batch()
-    data.visualize(im, motion)
+    data.display(im, motion)
 
 if __name__ == '__main__':
     unit_test()

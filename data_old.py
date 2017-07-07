@@ -176,11 +176,6 @@ def move_image_bg(args, im, m_x, m_y, m_range):
     return im_new
 
 
-def merge_objects(im):
-    [batch_size, num_objects, _, im_size, _] = im.shape
-    final_im = numpy.zeros((batch_size, 3, im_size, im_size))
-
-
 def display(args, images1, images2, images3, images4=None, images5=None):
     im_width, im_height = args.image_size, args.image_size
     width, height = visualize.get_img_size(2, 5, im_width, im_height)

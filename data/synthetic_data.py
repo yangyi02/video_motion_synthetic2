@@ -2,9 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
 
-import sys
-sys.path.append('..')
-from visualize.visualizer import BaseVisualizer
+from visualize.base_visualizer import BaseVisualizer
 from visualize import flowlib
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',

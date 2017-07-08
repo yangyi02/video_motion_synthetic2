@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONPATH=/home/yi/code/video_motion_synthetic2:$PYTHONPATH
+
 python data/box_data.py --num_objects=4 --num_frame=5 --batch_size=32 --image_size=32 --motion_range=3 --bg_move
 
 python data/mnist_data.py --num_objects=4 --num_frame=5 --batch_size=32 --image_size=32 --motion_range=3

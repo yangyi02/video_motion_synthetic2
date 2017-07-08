@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PYTHONPATH=/home/yi/code/video_motion_synthetic2:$PYTHONPATH
+source ../../set_path.sh
 
 # Create directories if not exist
 MODEL_PATH=./model

@@ -8,4 +8,4 @@ if [[ ! -e $MODEL_PATH ]]; then
     exit
 fi
 
-python ../demo.py --test --init_model=./model/final.pth --test_epoch=1 --batch_size=64 --motion_range=1 --image_size=32 --num_frame=3 --display 2>&1 | tee $MODEL_PATH/test.log
+python ../demo.py --test --init_model=./model/model.pth --test_epoch=10 --batch_size=64 --motion_range=1 --image_size=32 --num_frame=3 --display 2>&1 | tee $MODEL_PATH/test.log

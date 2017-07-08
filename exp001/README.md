@@ -6,8 +6,10 @@
 
 
 
-| Exp | Test Loss Improve (%) | Gt Loss Improve (%) |
-| ------------- | ----------- | ----------- |
-| 001 | 82 | 61 |
-| 002 | 82 | 57 |
+| Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
+| ------------- | ----------- | ----------- | ----------- | 
+| 001 | 82 | 61 | box, m_range=1 |
+| 002 | 81 | 57 | box, m_range=2 |
+| 003 | 83 | 68 | mnist, m_range=2 |
+| 004 | | | |
 

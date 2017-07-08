@@ -1,3 +1,3 @@
-[INFO 2017-07-08 13:30:17,265 demo.py:142] Namespace(batch_size=64, bg_move=False, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=2, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
-[INFO 2017-07-08 13:30:22,617 demo.py:118] average test loss: 2823.25, base loss: 6597.42
-[INFO 2017-07-08 13:30:22,618 demo.py:119] improve_loss: 3774.17, improve_percent: 0.57
+[INFO 2017-07-08 13:59:16,959 demo.py:142] Namespace(batch_size=64, bg_move=False, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=2, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
+[INFO 2017-07-08 13:59:22,252 demo.py:118] average test loss: 2729.46, base loss: 6266.81
+[INFO 2017-07-08 13:59:22,252 demo.py:119] improve_loss: 3537.34, improve_percent: 0.56

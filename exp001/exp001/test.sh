@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PYTHONPATH=/home/yi/code/video_motion_synthetic2:$PYTHONPATH
+source ../../set_path.sh
 
 MODEL_PATH="./model"
 if [[ ! -e $MODEL_PATH ]]; then

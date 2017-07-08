@@ -2,7 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from visualize.visualizer import BaseVisualizer
+from visualize.base_visualizer import BaseVisualizer
 from visualize import flowlib
 
 

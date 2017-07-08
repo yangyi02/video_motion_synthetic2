@@ -5,9 +5,9 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 
 
-class Net(nn.Module):
+class BaseNet(nn.Module):
     def __init__(self, im_height, im_width, im_channel, n_inputs, n_class, m_range, m_kernel):
-        super(Net, self).__init__()
+        super(BaseNet, self).__init__()
         num_hidden = 64
         self.conv0 = nn.Conv2d(n_inputs*im_channel, num_hidden, 3, 1, 1)
         self.bn0 = nn.BatchNorm2d(num_hidden)
@@ -77,18 +77,15 @@ class Net(nn.Module):
         m_mask = F.softmax(self.conv(x11))
 
         seg = construct_seg(m_mask, self.m_kernel, self.m_range)
-
+        appear = F.relu(1 - seg)
         disappear = F.relu(seg - 1)
-        appear = F.relu(1 - disappear)
-
-        pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, appear, self.m_kernel, self.m_range)
-
-        return pred, m_mask, 1 - appear
+        pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, disappear, self.m_kernel, self.m_range)
+        return pred, m_mask, disappear, appear
 
 
-class GtNet(nn.Module):
-    def __init__(self, args, im_height, im_width, im_channel, n_inputs, n_class, m_range, m_kernel):
-        super(GtNet, self).__init__()
+class BaseGtNet(nn.Module):
+    def __init__(self, im_height, im_width, im_channel, n_inputs, n_class, m_range, m_kernel):
+        super(BaseGtNet, self).__init__()
         self.im_height = im_height
         self.im_width = im_width
         self.im_channel = im_channel
@@ -99,12 +96,12 @@ class GtNet(nn.Module):
     def forward(self, im_input, gt_motion):
         m_mask = self.label2mask(gt_motion, self.n_class)
         seg = construct_seg(m_mask, self.m_kernel, self.m_range)
+        appear = F.relu(1 - seg)
         disappear = F.relu(seg - 1)
-        appear = F.relu(1 - disappear)
-        pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, appear, self.m_kernel, self.m_range)
-        return pred, m_mask, 1 - appear
+        pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, disappear, self.m_kernel, self.m_range)
+        return pred, m_mask, disappear, appear
 
-    def label2mask(motion, n_class):
+    def label2mask(self, motion, n_class):
         m_mask = Variable(torch.Tensor(motion.size(0), n_class, motion.size(2), motion.size(3)))
         if torch.cuda.is_available():
             m_mask = m_mask.cuda()
@@ -127,7 +124,8 @@ def construct_seg(m_mask, m_kernel, m_range):
     return seg
 
 
-def construct_image(im, m_mask, m_kernel, m_range):
+def construct_image(im, m_mask, disappear, m_kernel, m_range):
+    im = im * (1 - disappear).expand_as(im)
     pred = Variable(torch.Tensor(im.size()))
     if torch.cuda.is_available():
         pred = pred.cuda()

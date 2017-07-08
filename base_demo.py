@@ -9,14 +9,14 @@ import torch.nn.functional as F
 from learning_args import parse_args
 from data.mnist_data import MnistData
 from data.box_data import BoxData
-from model_demo import Net, GtNet
-from visualize.visualizer import Visualizer
+from base_model import BaseNet, BaseGtNet
+from visualize.base_visualizer import BaseVisualizer
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
 
 
-class Demo(object):
+class BaseDemo(object):
     def __init__(self, args):
         self.learning_rate = args.learning_rate
         self.train_epoch = args.train_epoch
@@ -36,17 +36,17 @@ class Demo(object):
         self.m_kernel = Variable(torch.from_numpy(self.data.m_kernel).float())
         if torch.cuda.is_available():
             self.m_kernel = self.m_kernel.cuda()
-        self.model = Net(self.im_size, self.im_size, 3, self.num_frame - 1,
-                         self.m_kernel.size(1), self.m_range, self.m_kernel)
-        self.model_gt = GtNet(self.im_size, self.im_size, 3, self.num_frame - 1,
-                              self.m_kernel.size(1), self.m_range, self.m_kernel)
+        self.model = BaseNet(self.im_size, self.im_size, 3, self.num_frame - 1,
+                             self.m_kernel.size(1), self.m_range, self.m_kernel)
+        self.model_gt = BaseGtNet(self.im_size, self.im_size, 3, self.num_frame - 1,
+                                  self.m_kernel.size(1), self.m_range, self.m_kernel)
         if torch.cuda.is_available():
             # model = torch.nn.DataParallel(model).cuda()
             self.model = self.model.cuda()
             self.model_gt = self.model_gt.cuda()
         if args.init_model_path is not '':
             self.model.load_state_dict(torch.load(args.init_model_path))
-        self.visualizer = Visualizer(args, self.data.reverse_m_dict)
+        self.visualizer = BaseVisualizer(args, self.data.reverse_m_dict)
 
     def train_unsupervised(self):
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
@@ -169,7 +169,7 @@ class Demo(object):
 def main():
     args = parse_args()
     logging.info(args)
-    demo = Demo(args)
+    demo = BaseDemo(args)
     if args.train:
         demo.train_unsupervised()
     if args.test:

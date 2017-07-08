@@ -4,7 +4,7 @@ from PIL import Image
 
 import sys
 sys.path.append('..')
-from visualize.visualizer import Visualizer
+from visualize.visualizer import BaseVisualizer
 from visualize import flowlib
 import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
@@ -21,7 +21,7 @@ class SyntheticData(object):
         self.bg_move = args.bg_move
         self.bg_noise = args.bg_noise
         self.m_dict, self.reverse_m_dict, self.m_kernel = self.motion_dict()
-        self.visualizer = Visualizer(args, self.reverse_m_dict)
+        self.visualizer = BaseVisualizer(args, self.reverse_m_dict)
 
     def motion_dict(self):
         m_range = self.m_range

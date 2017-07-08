@@ -7,42 +7,30 @@ import torch.optim as optim
 from torch.autograd import Variable
 import torch.nn.functional as F
 
+import sys
+sys.path.append('../')
 from learning_args import parse_args
-from mnist_data import MnistData
-from box_data import BoxData
-from models import Net, GtNet
+from base_demo import BaseDemo
+from model import Net, GtNet
 from visualizer import Visualizer
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
 
 
-class Demo(object):
+class Demo(BaseDemo):
     def __init__(self, args):
-        self.learning_rate = args.learning_rate
-        self.train_epoch = args.train_epoch
-        self.test_epoch = args.test_epoch
-        self.test_interval = args.test_interval
-        self.save_dir = args.save_dir
-        self.display = args.display
-        self.best_improve_percent = -1e10
-        if args.data == 'box':
-            self.data = BoxData(args)
-        elif args.data == 'mnist':
-            self.data = MnistData(args)
-        self.m_kernel = Variable(torch.from_numpy(self.data.m_kernel).float())
-        if torch.cuda.is_available():
-            self.m_kernel = self.m_kernel.cuda()
-        self.model = Net(args.image_size, args.image_size, 3, args.num_frame - 1,
-                         self.m_kernel.size(1), args.m_range, self.m_kernel)
-        self.model_gt = GtNet(args.image_size, args.image_size, 3, args.num_frame - 1,
-                              self.m_kernel.size(1), args.m_range, self.m_kernel)
+        super(Demo, self).__init__(args)
+        self.model = Net(self.im_size, self.im_size, 3, self.num_frame - 1,
+                         self.m_kernel.size(1), self.m_range, self.m_kernel)
+        self.model_gt = GtNet(self.im_size, self.im_size, 3, self.num_frame - 1,
+                              self.m_kernel.size(1), self.m_range, self.m_kernel)
         if torch.cuda.is_available():
             # model = torch.nn.DataParallel(model).cuda()
             self.model = self.model.cuda()
             self.model_gt = self.model_gt.cuda()
         if args.init_model_path is not '':
             self.model.load_state_dict(torch.load(args.init_model_path))
-        self.visualizer = Visualizer(args)
+        self.visualizer = Visualizer(args, self.data.reverse_m_dict)
 
     def train_unsupervised(self):
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
@@ -50,12 +38,13 @@ class Demo(object):
         for epoch in range(self.train_epoch):
             optimizer.zero_grad()
             im, motion = self.data.get_next_batch(self.data.train_images)
-            im_input, im_output = im[:-1, ...].swapaxes(0, 1), im[-1, ...]
+            im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
+            im_output = im[:, -1, :, :, :]
             im_input = Variable(torch.from_numpy(im_input).float())
             im_output = Variable(torch.from_numpy(im_output).float())
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
-            im_pred, m_mask, disappear = self.model(im_input)
+            im_pred, m_mask = self.model(im_input)
             loss = torch.abs(im_pred - im_output).sum()
             loss.backward()
             optimizer.step()
@@ -64,7 +53,7 @@ class Demo(object):
             if len(train_loss) > 100:
                 train_loss.pop(0)
             ave_train_loss = sum(train_loss) / float(len(train_loss))
-            base_loss.append(torch.abs(im_input[:, -1, :, :, :] - im_output).sum().data[0])
+            base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
             if len(base_loss) > 100:
                 base_loss.pop(0)
             ave_base_loss = sum(base_loss) / float(len(base_loss))
@@ -74,35 +63,27 @@ class Demo(object):
                 logging.info('epoch %d, testing', epoch)
                 self.validate()
 
-    def validate(self):
-        improve_percent = self.test_unsupervised()
-        if improve_percent >= self.best_improve_percent:
-            logging.info('model save to %s', os.path.join(self.save_dir, 'final.pth'))
-            with open(os.path.join(self.save_dir, 'final.pth'), 'w') as handle:
-                torch.save(self.model.state_dict(), handle)
-            self.best_improve_percent = improve_percent
-        logging.info('current best improved percent: %.2f', self.best_improve_percent)
-
     def test_unsupervised(self):
         base_loss, test_loss = [], []
         for epoch in range(self.test_epoch):
             im, motion = self.data.get_next_batch(self.data.test_images)
-            im_input, im_output = im[:-1, ...].swapaxes(0, 1), im[-1, ...]
-            gt_motion = motion[-2, :, :, :, :]
+            im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
+            im_output = im[:, -1, :, :, :]
+            gt_motion = motion[:, -2, :, :, :]
             im_input = Variable(torch.from_numpy(im_input).float())
             im_output = Variable(torch.from_numpy(im_output).float())
             gt_motion = Variable(torch.from_numpy(gt_motion))
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
                 gt_motion = gt_motion.cuda()
-            im_pred, m_mask, disappear = self.model(im_input)
+            im_pred, m_mask = self.model(im_input)
             loss = torch.abs(im_pred - im_output).sum()
 
             test_loss.append(loss.data[0])
-            base_loss.append(torch.abs(im_input[:, -1, :, :, :] - im_output).sum().data[0])
+            base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
             if self.display:
                 flow = self.motion2flow(m_mask)
-                self.visualizer.visualize(im_input, im_output, im_pred, flow, gt_motion, disappear)
+                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion)
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss
@@ -115,22 +96,23 @@ class Demo(object):
         base_loss, test_loss = [], []
         for epoch in range(self.test_epoch):
             im, motion = self.data.get_next_batch(self.data.test_images)
-            im_input, im_output = im[:-1, ...].swapaxes(0, 1), im[-1, ...]
-            gt_motion = motion[-2, :, :, :, :]
+            im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
+            im_output = im[:, -1, :, :, :]
+            gt_motion = motion[:, -2, :, :, :]
             im_input = Variable(torch.from_numpy(im_input).float())
             im_output = Variable(torch.from_numpy(im_output).float())
             gt_motion = Variable(torch.from_numpy(gt_motion))
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
                 gt_motion = gt_motion.cuda()
-            im_pred, m_mask, disappear = self.model_gt(im_input, gt_motion)
+            im_pred, m_mask = self.model_gt(im_input, gt_motion)
             loss = torch.abs(im_pred - im_output).sum()
 
             test_loss.append(loss.data[0])
-            base_loss.append(torch.abs(im_input[:, -1, :, :, :] - im_output).sum().data[0])
+            base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
             if self.display:
                 flow = self.motion2flow(m_mask)
-                self.visualizer.visualize(im_input, im_output, im_pred, flow, gt_motion, disappear)
+                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion)
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss

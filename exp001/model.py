@@ -76,14 +76,8 @@ class Net(nn.Module):
         x11 = F.relu(self.bn11(self.conv11(x11)))
         m_mask = F.softmax(self.conv(x11))
 
-        seg = construct_seg(m_mask, self.m_kernel, self.m_range)
-
-        disappear = F.relu(seg - 1)
-        appear = F.relu(1 - disappear)
-
         pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, self.m_kernel, self.m_range)
-
-        return pred, m_mask, 1 - appear
+        return pred, m_mask
 
 
 class GtNet(nn.Module):
@@ -98,11 +92,8 @@ class GtNet(nn.Module):
 
     def forward(self, im_input, gt_motion):
         m_mask = self.label2mask(gt_motion, self.n_class)
-        seg = construct_seg(m_mask, self.m_kernel, self.m_range)
-        disappear = F.relu(seg - 1)
-        appear = F.relu(1 - disappear)
         pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, self.m_kernel, self.m_range)
-        return pred, m_mask, 1 - appear
+        return pred, m_mask
 
     def label2mask(self, motion, n_class):
         m_mask = Variable(torch.Tensor(motion.size(0), n_class, motion.size(2), motion.size(3)))

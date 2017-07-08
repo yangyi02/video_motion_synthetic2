@@ -7,8 +7,6 @@ import torch.optim as optim
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-import sys
-sys.path.append('../')
 from learning_args import parse_args
 from base_demo import BaseDemo
 from model import Net, GtNet

@@ -16,12 +16,12 @@ def parse_args():
     arg_parser.add_argument('--train_epoch', type=int, default=1000)
     arg_parser.add_argument('--test_epoch', type=int, default=10)
     arg_parser.add_argument('--test_interval', type=int, default=100)
-    arg_parser.add_argument('--save_dir', default='./model')
+    arg_parser.add_argument('--save_dir', default='./')
 
     arg_parser.add_argument('--init_model_path', default='')
     arg_parser.add_argument('--display', action='store_true')
     arg_parser.add_argument('--save_display', action='store_true')
-    arg_parser.add_argument('--save_display_dir', default='./result')
+    arg_parser.add_argument('--save_display_dir', default='./')
 
     arg_parser.add_argument('--learning_rate', type=float, default=0.001)
 

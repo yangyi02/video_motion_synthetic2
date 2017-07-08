@@ -5,11 +5,11 @@
 - Photometric loss for every pixel
 
 
-
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
-| 001 | 82 | 61 | box, m_range=1 |
-| 002 | 81 | 57 | box, m_range=2 |
-| 003 | 83 | 68 | mnist, m_range=2 |
-| 004 | | | |
+| 1 | 82 | 61 | box, m_range=1 |
+| 2 | 81 | 57 | box, m_range=2 |
+| 3 | 83 | 68 | mnist, m_range=2 |
+| 4 | 82 | 68 | mnist, m_range=2, image_size=64 |
+| 5 | 81 | 63 | box, m_range=2, image_size=64 | 
 

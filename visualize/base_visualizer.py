@@ -1,3 +1,4 @@
+import os
 import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -12,21 +13,10 @@ class BaseVisualizer(object):
         self.im_height = args.image_size
         self.im_width = args.image_size
         self.num_frame = args.num_frame
+        self.save_display = args.save_display
+        self.save_display_dir = args.save_display_dir
 
-    def visualize_result(self, im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear):
-        img = self.visualize(im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear)
-        if True:
-            plt.figure(1)
-            plt.imshow(img)
-            plt.axis('off')
-            plt.show()
-        else:
-            img = img * 255.0
-            img = img.astype(numpy.uint8)
-            img = Image.fromarray(img)
-            img.save('tmp.png')
-
-    def visualize(self, im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear):
+    def visualize_result(self, im_input, im_output, im_pred, pred_motion, gt_motion, disappear, appear, file_name='tmp.png'):
         width, height = self.get_img_size(3, max(self.num_frame + 1, 4))
         img = numpy.ones((height, width, 3))
         prev_im = None
@@ -80,7 +70,16 @@ class BaseVisualizer(object):
         x1, y1, x2, y2 = self.get_img_coordinate(3, 4)
         img[y1:y2, x1:x2, :] = appear
 
-        return img
+        if self.save_display:
+            img = img * 255.0
+            img = img.astype(numpy.uint8)
+            img = Image.fromarray(img)
+            img.save(os.path.join(self.save_display_dir, file_name))
+        else:
+            plt.figure(1)
+            plt.imshow(img)
+            plt.axis('off')
+            plt.show()
 
     def get_img_size(self, n_row, n_col):
         im_width, im_height = self.im_width, self.im_height
@@ -103,3 +102,4 @@ class BaseVisualizer(object):
             for j in range(motion_label.shape[1]):
                 motion[i, j, :] = numpy.asarray(reverse_m_dict[motion_label[i, j]])
         return motion
+

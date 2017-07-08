@@ -81,7 +81,7 @@ class Demo(BaseDemo):
             base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
             if self.display:
                 flow = self.motion2flow(m_mask)
-                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion)
+                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion, 'test_%d.png' % epoch)
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss
@@ -110,7 +110,7 @@ class Demo(BaseDemo):
             base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
             if self.display:
                 flow = self.motion2flow(m_mask)
-                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion)
+                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion, 'test_gt.png')
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss

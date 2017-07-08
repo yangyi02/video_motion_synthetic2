@@ -82,7 +82,7 @@ class BaseDemo(object):
     def validate(self):
         improve_percent = self.test_unsupervised()
         if improve_percent >= self.best_improve_percent:
-            logging.info('model save to %s', os.path.join(self.save_dir, 'final.pth'))
+            logging.info('model save to %s', os.path.join(self.save_dir, 'model.pth'))
             with open(os.path.join(self.save_dir, 'model.pth'), 'w') as handle:
                 torch.save(self.model.state_dict(), handle)
             self.best_improve_percent = improve_percent
@@ -109,7 +109,7 @@ class BaseDemo(object):
             if self.display:
                 flow = self.motion2flow(m_mask)
                 self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion,
-                                                 disappear, appear)
+                                                 disappear, appear, 'test_%d.png' % epoch)
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss
@@ -138,8 +138,8 @@ class BaseDemo(object):
             base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
             if self.display:
                 flow = self.motion2flow(m_mask)
-                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion,
-                                                 disappear, appear)
+                self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion, disappear, appear, 'test_gt.png')
+
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss

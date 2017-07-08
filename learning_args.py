@@ -20,6 +20,8 @@ def parse_args():
 
     arg_parser.add_argument('--init_model_path', default='')
     arg_parser.add_argument('--display', action='store_true')
+    arg_parser.add_argument('--save_display', action='store_true')
+    arg_parser.add_argument('--save_display_dir', default='./result')
 
     arg_parser.add_argument('--learning_rate', type=float, default=0.001)
 

@@ -1,3 +1,4 @@
+import os
 import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -20,6 +21,8 @@ class SyntheticData(object):
         self.bg_noise = args.bg_noise
         self.m_dict, self.reverse_m_dict, self.m_kernel = self.motion_dict()
         self.visualizer = BaseVisualizer(args, self.reverse_m_dict)
+        self.save_display = args.save_display
+        self.save_display_dir = args.save_display_dir
 
     def motion_dict(self):
         m_range = self.m_range
@@ -193,13 +196,14 @@ class SyntheticData(object):
             x1, y1, x2, y2 = self.visualizer.get_img_coordinate(3, i + 1)
             img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        if True:
+        if self.save_display:
+            img = img * 255.0
+            img = img.astype(numpy.uint8)
+            img = Image.fromarray(img)
+            img.save(os.path.join(self.save_display_dir, 'data.png'))
+        else:
             plt.figure(1)
             plt.imshow(img)
             plt.axis('off')
             plt.show()
-        else:
-            img = img * 255.0
-            img = img.astype(numpy.uint8)
-            img = Image.fromarray(img)
-            img.save('tmp.png')
+

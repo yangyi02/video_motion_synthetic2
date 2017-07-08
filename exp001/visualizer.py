@@ -1,3 +1,4 @@
+import os
 import numpy
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -10,20 +11,7 @@ class Visualizer(BaseVisualizer):
     def __init__(self, args, reverse_m_dict):
         super(Visualizer, self).__init__(args, reverse_m_dict)
 
-    def visualize_result(self, im_input, im_output, im_pred, pred_motion, gt_motion):
-        img = self.visualize(im_input, im_output, im_pred, pred_motion, gt_motion)
-        if True:
-            plt.figure(1)
-            plt.imshow(img)
-            plt.axis('off')
-            plt.show()
-        else:
-            img = img * 255.0
-            img = img.astype(numpy.uint8)
-            img = Image.fromarray(img)
-            img.save('tmp.png')
-
-    def visualize(self, im_input, im_output, im_pred, pred_motion, gt_motion):
+    def visualize_result(self, im_input, im_output, im_pred, pred_motion, gt_motion, file_name='tmp.png'):
         width, height = self.get_img_size(3, max(self.num_frame + 1, 4))
         img = numpy.ones((height, width, 3))
         prev_im = None
@@ -65,4 +53,14 @@ class Visualizer(BaseVisualizer):
         x1, y1, x2, y2 = self.get_img_coordinate(3, 2)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        return img
+        if self.save_display:
+            img = img * 255.0
+            img = img.astype(numpy.uint8)
+            img = Image.fromarray(img)
+            img.save(os.path.join(self.save_display_dir, file_name))
+        else:
+            plt.figure(1)
+            plt.imshow(img)
+            plt.axis('off')
+            plt.show()
+

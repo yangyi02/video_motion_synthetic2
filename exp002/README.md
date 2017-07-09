@@ -12,4 +12,5 @@
 | 3 | 83 | 84 | mnist, m_range=2 |
 | 4 | 80 | 84 | mnist, m_range=2, image_size=64 |
 | 5 | 81 | 81 | box, m_range=2, image_size=64 | 
-
+| 6 | 66 | 60 | box, m_range=2, num_objects=2 |
+| 7 | 65 | 64 | mnist, m_range=2, num_objects=2 | 

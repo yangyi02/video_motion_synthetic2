@@ -7,9 +7,9 @@
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
-| 1 |  | 100 | box, m_range=1 |
-| 2 |  | 100 | box, m_range=2 |
-| 3 |  | 100 | mnist, m_range=2 |
-| 4 |  | 100 | mnist, m_range=2, image_size=64 |
-| 5 |  | 100 | box, m_range=2, image_size=64 | 
+| 1 | 100 | 100 | box, m_range=1 |
+| 2 | 92 | 100 | box, m_range=2 |
+| 3 | 98 | 100 | mnist, m_range=2 |
+| 4 | 88 | 100 | mnist, m_range=2, image_size=64 |
+| 5 | 100 | 100 | box, m_range=2, image_size=64 | 
 

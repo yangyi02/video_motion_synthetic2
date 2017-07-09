@@ -12,6 +12,8 @@
 | 3 | 98 | 100 | mnist, m_range=2 |
 | 4 | 88 | 100 | mnist, m_range=2, image_size=64 |
 | 5 | 100 | 100 | box, m_range=2, image_size=64 | 
+| 6 | 88 | 94 | box, m_range=2, num_objects=2 |
+| 7 | 86 | 90 | mnist, m_range=2, num_objects=2 |  
 
 Take Home Message:
 

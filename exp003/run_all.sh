@@ -13,3 +13,9 @@ cd ..
 cd exp5
 sh train.sh && sh test.sh
 cd ..
+cd exp6
+sh train.sh && sh test.sh
+cd ..
+cd exp7
+sh train.sh && sh test.sh
+cd ..

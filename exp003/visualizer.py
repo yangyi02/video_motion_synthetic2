@@ -22,7 +22,7 @@ class Visualizer(BaseVisualizer):
 
             if i > 0:
                 im_diff = abs(curr_im - prev_im)
-                x1, y1, x2, y2 = self.get_img_coordinate(2, i+1)
+                x1, y1, x2, y2 = self.get_img_coordinate(2, i)
                 img[y1:y2, x1:x2, :] = im_diff
             prev_im = curr_im
 
@@ -31,7 +31,7 @@ class Visualizer(BaseVisualizer):
         img[y1:y2, x1:x2, :] = im_output
 
         im_diff = numpy.abs(im_output - prev_im)
-        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame)
+        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame - 1)
         img[y1:y2, x1:x2, :] = im_diff
 
         pred = im_pred[0].cpu().data.numpy().transpose(1, 2, 0)
@@ -39,7 +39,7 @@ class Visualizer(BaseVisualizer):
         img[y1:y2, x1:x2, :] = pred
 
         im_diff = numpy.abs(pred - im_output)
-        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame + 1)
+        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame)
         img[y1:y2, x1:x2, :] = im_diff
 
         pred_motion = pred_motion[0].cpu().data.numpy().transpose(1, 2, 0)
@@ -53,17 +53,21 @@ class Visualizer(BaseVisualizer):
         x1, y1, x2, y2 = self.get_img_coordinate(3, 2)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        disappear = disappear[0].cpu().data.numpy().squeeze()
-        cmap = plt.get_cmap('jet')
-        disappear = cmap(disappear)[:, :, 0:3]
-        x1, y1, x2, y2 = self.get_img_coordinate(3, 3)
-        img[y1:y2, x1:x2, :] = disappear
-
         appear = appear[0].cpu().data.numpy().squeeze()
         cmap = plt.get_cmap('jet')
-        appear = cmap(appear)[:, :, 0:3]
+        appear_map = cmap(appear)[:, :, 0:3]
+        x1, y1, x2, y2 = self.get_img_coordinate(3, 3)
+        img[y1:y2, x1:x2, :] = appear_map
+
+        disappear = disappear[0].cpu().data.numpy().squeeze()
+        cmap = plt.get_cmap('jet')
+        disappear_map = cmap(disappear)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(3, 4)
-        img[y1:y2, x1:x2, :] = appear
+        img[y1:y2, x1:x2, :] = disappear_map
+
+        im_diff = numpy.expand_dims(1 - appear, 2).repeat(3, 2) * numpy.abs(pred - im_output)
+        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame + 1)
+        img[y1:y2, x1:x2, :] = im_diff
 
         if self.save_display:
             img = img * 255.0

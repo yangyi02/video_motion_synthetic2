@@ -13,3 +13,9 @@ cd ..
 cd exp5
 sh test_gt.sh
 cd ..
+cd exp6
+sh test_gt.sh
+cd ..
+cd exp7
+sh test_gt.sh
+cd ..

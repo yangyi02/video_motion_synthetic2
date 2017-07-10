@@ -13,3 +13,9 @@ cd ..
 cd exp5
 sh clean.sh
 cd ..
+cd exp6
+sh clean.sh
+cd ..
+cd exp7
+sh clean.sh
+cd ..

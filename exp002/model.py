@@ -44,7 +44,9 @@ class Net(nn.Module):
         self.n_inputs = n_inputs
         self.n_class = n_class
         self.m_range = m_range
-        self.m_kernel = m_kernel
+        self.m_kernel = Variable(torch.from_numpy(m_kernel).float())
+        if torch.cuda.is_available():
+            self.m_kernel = self.m_kernel.cuda()
 
     def forward(self, im_input):
         x = self.bn0(self.conv0(im_input))
@@ -91,7 +93,9 @@ class GtNet(nn.Module):
         self.im_channel = im_channel
         self.n_class = n_class
         self.m_range = m_range
-        self.m_kernel = m_kernel
+        self.m_kernel = Variable(torch.from_numpy(m_kernel).float())
+        if torch.cuda.is_available():
+            self.m_kernel = self.m_kernel.cuda()
 
     def forward(self, im_input, gt_motion):
         m_mask = self.label2mask(gt_motion, self.n_class)

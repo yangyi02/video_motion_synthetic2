@@ -33,20 +33,22 @@ class BaseDemo(object):
             self.data = BoxData(args)
         elif args.data == 'mnist':
             self.data = MnistData(args)
-        self.m_kernel = Variable(torch.from_numpy(self.data.m_kernel).float())
-        if torch.cuda.is_available():
-            self.m_kernel = self.m_kernel.cuda()
+        self.init_model_path = args.init_model_path
+        self.model, self.model_gt = self.init_model(self.data.m_kernel)
+        self.visualizer = BaseVisualizer(args, self.data.reverse_m_dict)
+
+    def init_model(self, m_kernel):
         self.model = BaseNet(self.im_size, self.im_size, 3, self.num_frame - 1,
-                             self.m_kernel.size(1), self.m_range, self.m_kernel)
+                             m_kernel.shape[1], self.m_range, m_kernel)
         self.model_gt = BaseGtNet(self.im_size, self.im_size, 3, self.num_frame - 1,
-                                  self.m_kernel.size(1), self.m_range, self.m_kernel)
+                                  m_kernel.shape[1], self.m_range, m_kernel)
         if torch.cuda.is_available():
             # model = torch.nn.DataParallel(model).cuda()
             self.model = self.model.cuda()
             self.model_gt = self.model_gt.cuda()
-        if args.init_model_path is not '':
-            self.model.load_state_dict(torch.load(args.init_model_path))
-        self.visualizer = BaseVisualizer(args, self.data.reverse_m_dict)
+        if self.init_model_path is not '':
+            self.model.load_state_dict(torch.load(self.init_model_path))
+        return self.model, self.model_gt
 
     def train_unsupervised(self):
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)

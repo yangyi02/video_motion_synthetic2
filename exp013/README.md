@@ -1,0 +1,15 @@
+### Bidirectional Model, Estimate Disappear with Neural Net
+
+
+| Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
+| ------------- | ----------- | ----------- | ----------- | 
+| 1 | | | box, m_range=1 |
+| 2 | | | box, m_range=2 |
+| 3 | | | mnist, m_range=2 |
+| 4 | | | mnist, m_range=2, image_size=64 |
+| 5 | | | box, m_range=2, image_size=64 | 
+| 6 | | | box, m_range=2, num_objects=2 |
+| 7 | | | mnist, m_range=2, num_objects=2 | 
+
+Take Home Message:
+

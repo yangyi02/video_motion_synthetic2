@@ -1,0 +1,3 @@
+[INFO 2017-07-10 23:23:22,936 demo.py:193] Namespace(batch_size=64, bg_move=False, bg_noise=0.5, bidirection=False, data='mnist', display=True, fg_noise=0.1, image_size=32, init_model_path='./model.pth', learning_rate=0.001, method='unsupervised', motion_range=2, num_frame=5, num_objects=2, save_dir='./', save_display=True, save_display_dir='./', test=True, test_epoch=10, test_gt=False, test_interval=100, train=False, train_epoch=1000)
+[INFO 2017-07-10 23:23:29,154 demo.py:125] average test loss: 3157.38, base loss: 20252.60
+[INFO 2017-07-10 23:23:29,155 demo.py:126] improve_loss: 17095.22, improve_percent: 0.84

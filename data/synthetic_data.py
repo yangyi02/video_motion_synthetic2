@@ -39,7 +39,7 @@ class SyntheticData(object):
         return m_dict, reverse_m_dict, m_kernel
 
     def generate_data(self, src_image, src_mask):
-        batch_size, im_size, num_frame = self.batch_size, self.im_size, self.num_frame
+        batch_size, im_size = self.batch_size, self.im_size
         m_dict = self.m_dict
         # generate foreground motion
         src_motion, m_x, m_y = self.generate_motion(self.num_objects, src_mask)
@@ -206,4 +206,3 @@ class SyntheticData(object):
             plt.imshow(img)
             plt.axis('off')
             plt.show()
-

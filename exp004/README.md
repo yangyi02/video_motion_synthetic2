@@ -15,6 +15,7 @@
 | 5 | 81 | 81 | box, m_range=2, image_size=64 | 
 | 6 | 66 | 58 | box, m_range=2, num_objects=2 |
 | 7 | 63 | 65 | mnist, m_range=2, num_objects=2 | 
+| 8 |    | 75 | box, m_range=2, bg_move |
 
 Take Home Message:
 

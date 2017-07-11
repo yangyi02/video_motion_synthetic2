@@ -38,8 +38,19 @@ class MnistData(SyntheticData):
                 x = numpy.random.randint(0, im_size - width)
                 y = numpy.random.randint(0, im_size - height)
                 im[i, j, :, y:y+height, x:x+width] = mnist_im[j, :, :, :]
+                im[i, j, :, :, :] = self.random_shift(im[i, j, :, :, :], im_size/4)
         mask = numpy.expand_dims(im.sum(2) > 0, 2)
         return im, mask
+
+    def random_shift(self, im, max_shift):
+        batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
+        shift = numpy.random.randint(-max_shift, max_shift, size=2)
+        im_big = numpy.zeros((3, im_size + 2 * max_shift, im_size + 2 * max_shift))
+        im_big[:, max_shift:-max_shift, max_shift:-max_shift] = im
+        x = max_shift + shift[0]
+        y = max_shift + shift[1]
+        im = im_big[:, y:y + im_size, x:x+im_size]
+        return im
 
     def get_next_batch(self, images):
         src_image, src_mask = self.generate_source_image(images)
@@ -56,4 +67,3 @@ def unit_test():
 
 if __name__ == '__main__':
     unit_test()
-

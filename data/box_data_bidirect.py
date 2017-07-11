@@ -40,7 +40,7 @@ class BoxDataBidirect(SyntheticDataBidirect):
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
-    data = BoxData(args)
+    data = BoxDataBidirect(args)
     im, motion, motion_r = data.get_next_batch()
     data.display(im, motion, motion_r)
 

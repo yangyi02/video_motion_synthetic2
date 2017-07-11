@@ -50,7 +50,7 @@ class MnistDataBidirect(SyntheticDataBidirect):
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
-    data = MnistData(args)
+    data = MnistDataBidirect(args)
     im, motion, motion_r = data.get_next_batch(data.train_images)
     data.display(im, motion, motion_r)
 

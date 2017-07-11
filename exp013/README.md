@@ -1,5 +1,6 @@
-### Bidirectional Model, Estimate Disappear with Neural Net
+## Same as Exp012 But Using Neural Nets to Predict Occlusion
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -10,6 +11,7 @@
 | 5 | | | box, m_range=2, image_size=64 | 
 | 6 | | | box, m_range=2, num_objects=2 |
 | 7 | | | mnist, m_range=2, num_objects=2 | 
+| 8 | |    | box, m_range=2, bg_move |
 
-Take Home Message:
+### Take Home Message
 

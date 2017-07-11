@@ -1,9 +1,10 @@
-### Same Model as Exp002 But Loss Consider New Appear Pixels
+## Same Model as Exp002 But Loss Consider New Appear Pixels
 
-- Occlusion modeling
+- Occlusion modeling, moving pixels will occlude static pixels
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -14,7 +15,8 @@
 | 5 | 99 | 100 | box, m_range=2, image_size=64 | 
 | 6 | 88 | 94 | box, m_range=2, num_objects=2 |
 | 7 | 86 | 90 | mnist, m_range=2, num_objects=2 |  
+| 8 |    |    | box, m_range=2, bg_move |
 
-Take Home Message:
+### Take Home Message
 
-Although this significantly improves test loss, the optical flow estimation actually becomes slightly worse. 
+- Although this significantly improves test loss, the optical flow estimation actually becomes slightly worse. 

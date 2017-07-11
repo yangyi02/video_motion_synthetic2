@@ -1,10 +1,10 @@
-### Same as Exp003 But Using Neural Nets to Predict Occlusion
+## Same as Exp003 But Using Neural Nets to Predict Occlusion
 
-- Occlusion modeling
+- Occlusion modeling, predict occlusion using neural nets instead of derived from motion
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded
-- Predict occlusion using neural nets instead of derived from motion
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -15,7 +15,9 @@
 | 5 | 91 | 100 | box, m_range=2, image_size=64 | 
 | 6 | 82 | 94 | box, m_range=2, num_objects=2 |
 | 7 | 82 | 90 | mnist, m_range=2, num_objects=2 | 
+| 8 |    | | box, m_range=2, bg_move |
 
-Take Home Message:
+### Take Home Message
 
-Does not work very good. The neural network prefer to predict more places as occluded to decrease loss.
+- Does not work very good. 
+- The neural network prefer to predict more places as occluded to decrease loss.

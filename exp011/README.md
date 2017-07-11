@@ -1,10 +1,11 @@
-### Same as Exp008 But Use Deeper Model 
+## Same as Exp008 But Use Deeper Model 
 
-- Occlusion modeling
+- Occlusion modeling, predict conflict occlusion and appear using motion
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded and not appeared, then divided by the total number of existing pixels
-- Predict occlusion and appeara using motion
+- Neural nets get twice deeper
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -15,7 +16,8 @@
 | 5 | | 100 | box, m_range=2, image_size=64 | 
 | 6 | | 99 | box, m_range=2, num_objects=2 |
 | 7 | | 98 | mnist, m_range=2, num_objects=2 | 
+| 8 | |    | box, m_range=2, bg_move |
 
-Take Home Message:
+### Take Home Message
 
-Deeper model does not help on handle occlusion
+- Deeper model does not help on handle occlusion

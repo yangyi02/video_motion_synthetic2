@@ -1,9 +1,10 @@
-### The Simplest Version
+## The Simplest Version
 
 - No occlusion modeling
 - Predict motion for every pixel
 - Photometric loss for every pixel
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -14,3 +15,8 @@
 | 5 | 81 | 63 | box, m_range=2, image_size=64 | 
 | 6 | 68 | 37 | box, m_range=2, num_objects=2 |
 | 7 | 66 | 51 | mnist, m_range=2, num_objects=2 | 
+| 8 |    |    | box, m_range=2, bg_move |
+
+### Take Home Message
+
+- Improving better than ground truth loss suggests this is not a correct model

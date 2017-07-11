@@ -1,10 +1,10 @@
-### Same as Exp006 But Conflict Region and Appear Region Both no Loss
+## Same as Exp006 But Conflict Region and Appear Region Both no Loss
 
-- Occlusion modeling
+- Occlusion modeling, predict conflict occlusion and appear using motion
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded and not appeared, then divided by the total number of existing pixels
-- Predict occlusion and appeara using motion
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -15,9 +15,9 @@
 | 5 | | 100 | box, m_range=2, image_size=64 | 
 | 6 | | 99 | box, m_range=2, num_objects=2 |
 | 7 | | 98 | mnist, m_range=2, num_objects=2 | 
+| 8 |    | | box, m_range=2, bg_move |
 
-Take Home Message:
+### Take Home Message
 
-Results on Mnist overlap dataset suggest this is not a good model. 
-
-Perhaps we still need to reconsider bidirectional model or even deal with occlusion now.
+- Results on Mnist overlap dataset suggest this is not a good model. 
+- Perhaps we still need to reconsider bidirectional model or even deal with occlusion now.

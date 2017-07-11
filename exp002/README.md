@@ -1,9 +1,10 @@
-### Reconstruction Consider Occluded Disappear Pixels
+## Reconstruction Consider Moving Pixels Occlude Static Pixels
 
-- Occlusion modeling
+- Occlusion modeling, moving pixels will occlude static pixels
 - Predict motion for every pixel
 - Photometric loss for every pixel
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -14,3 +15,7 @@
 | 5 | 81 | 81 | box, m_range=2, image_size=64 | 
 | 6 | 66 | 60 | box, m_range=2, num_objects=2 |
 | 7 | 65 | 64 | mnist, m_range=2, num_objects=2 | 
+| 8 |    |    | box, m_range=2, bg_move |
+
+### Take Home Message
+

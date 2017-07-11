@@ -1,10 +1,11 @@
-### Same as Exp002 But Motion Kernel Separate as x and y
+## Same as Exp002 But Motion Kernel Separate as x and y
 
-- Occlusion modeling
+- Occlusion modeling, moving pixels will occlude static pixels
 - Predict motion for every pixel
 - Photometric loss for every pixel
 - Motion decomposed to x and y direction
 
+### Results
 
 | Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
 | ------------- | ----------- | ----------- | ----------- | 
@@ -17,6 +18,6 @@
 | 7 | 63 | 65 | mnist, m_range=2, num_objects=2 | 
 | 8 |    | 75 | box, m_range=2, bg_move |
 
-Take Home Message:
+### Take Home Message
 
-When motion range is small, the benefit for decomposing x and y is not evident 
+- When motion range is small, the benefit for decomposing x and y is not evident 

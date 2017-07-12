@@ -1,6 +1,5 @@
 import os
 import numpy
-import logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,6 +12,7 @@ from data.box_data_bidirect import BoxDataBidirect
 from base_demo import BaseDemo
 from model import Net, GtNet
 from visualizer import Visualizer
+import logging
 logging.basicConfig(format='[%(levelname)s %(asctime)s %(filename)s:%(lineno)s] %(message)s',
                             level=logging.INFO)
 
@@ -83,6 +83,7 @@ class Demo(BaseDemo):
 
     def test_unsupervised(self):
         base_loss, test_loss = [], []
+        test_accuracy = []
         for epoch in range(self.test_epoch):
             im, motion, motion_r = self.data.get_next_batch(self.data.test_images)
             im_input_f = im[:, :self.num_inputs, :, :, :].reshape(
@@ -109,6 +110,12 @@ class Demo(BaseDemo):
             test_loss.append(loss.data[0])
             base_loss.append(torch.abs(im_input_f[:, -3:, :, :] - im_output).sum().data[0])
             base_loss.append(torch.abs(im_input_b[:, -3:, :, :] - im_output).sum().data[0])
+            pred_motion_f = m_mask_f.max(1)[1]
+            pred_motion_b = m_mask_b.max(1)[1]
+            accuracy_f = pred_motion_f.eq(gt_motion_f).float().sum() / gt_motion_f.numel()
+            accuracy_b = pred_motion_b.eq(gt_motion_b).float().sum() / gt_motion_b.numel()
+            test_accuracy.append(accuracy_f.cpu().data[0])
+            test_accuracy.append(accuracy_b.cpu().data[0])
             if self.display:
                 flow_f = self.motion2flow(m_mask_f)
                 flow_b = self.motion2flow(m_mask_b)
@@ -122,10 +129,13 @@ class Demo(BaseDemo):
         improve_percent = improve_loss / (base_loss + 1e-5)
         logging.info('average test loss: %.2f, base loss: %.2f', test_loss, base_loss)
         logging.info('improve_loss: %.2f, improve_percent: %.2f', improve_loss, improve_percent)
+        test_accuracy = numpy.mean(numpy.asarray(test_accuracy))
+        logging.info('average test accuracy: %.2f', test_accuracy)
         return improve_percent
 
     def test_gt_unsupervised(self):
         base_loss, test_loss = [], []
+        test_accuracy = []
         for epoch in range(self.test_epoch):
             im, motion, motion_r = self.data.get_next_batch(self.data.test_images)
             im_input_f = im[:, :self.num_inputs, :, :, :].reshape(
@@ -152,6 +162,12 @@ class Demo(BaseDemo):
             test_loss.append(loss.data[0])
             base_loss.append(torch.abs(im_input_f[:, -3:, :, :] - im_output).sum().data[0])
             base_loss.append(torch.abs(im_input_b[:, -3:, :, :] - im_output).sum().data[0])
+            pred_motion_f = m_mask_f.max(1)[1]
+            pred_motion_b = m_mask_b.max(1)[1]
+            accuracy_f = pred_motion_f.eq(gt_motion_f).float().sum() / gt_motion_f.numel()
+            accuracy_b = pred_motion_b.eq(gt_motion_b).float().sum() / gt_motion_b.numel()
+            test_accuracy.append(accuracy_f.cpu().data[0])
+            test_accuracy.append(accuracy_b.cpu().data[0])
             if self.display:
                 flow_f = self.motion2flow(m_mask_f)
                 flow_b = self.motion2flow(m_mask_b)
@@ -163,8 +179,10 @@ class Demo(BaseDemo):
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss
         improve_percent = improve_loss / (base_loss + 1e-5)
-        logging.info('average test loss: %.2f, base loss: %.2f', test_loss, base_loss)
+        logging.info('average groundtruth test loss: %.2f, base loss: %.2f', test_loss, base_loss)
         logging.info('improve_loss: %.2f, improve_percent: %.2f', improve_loss, improve_percent)
+        test_accuracy = numpy.mean(numpy.asarray(test_accuracy))
+        logging.info('average groundtruth test accuracy: %.2f', test_accuracy)
         return improve_percent
 
     def motion2flow(self, m_mask):

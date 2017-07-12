@@ -1,3 +1,0 @@
-[INFO 2017-07-08 22:01:17,693 demo.py:142] Namespace(batch_size=64, bg_move=False, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=2, num_frame=3, num_objects=2, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
-[INFO 2017-07-08 22:01:23,319 demo.py:118] average test loss: 4096.27, base loss: 10211.18
-[INFO 2017-07-08 22:01:23,319 demo.py:119] improve_loss: 6114.91, improve_percent: 0.60

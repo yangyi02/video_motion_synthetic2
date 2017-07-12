@@ -79,10 +79,10 @@ class Net(nn.Module):
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11(self.conv11(x11)))
         m_mask = F.softmax(self.conv(x11))
+        disappear = F.sigmoid(self.conv_d(x11))
 
         seg = construct_seg(m_mask, self.m_kernel, self.m_range)
         appear = F.relu(1 - seg)
-        disappear = F.sigmoid(self.conv_d(x11))
         pred = construct_image(im_input[:, -self.im_channel:, :, :], m_mask, disappear, self.m_kernel, self.m_range)
         return pred, m_mask, disappear, appear
 

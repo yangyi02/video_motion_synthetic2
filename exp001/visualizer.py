@@ -47,8 +47,7 @@ class Visualizer(BaseVisualizer):
         x1, y1, x2, y2 = self.get_img_coordinate(3, 1)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        gt_motion = gt_motion[0].cpu().data.numpy().squeeze()
-        gt_motion = self.label2motion(gt_motion)
+        gt_motion = gt_motion[0].cpu().data.numpy().transpose(1, 2, 0)
         optical_flow = flowlib.visualize_flow(gt_motion, self.m_range)
         x1, y1, x2, y2 = self.get_img_coordinate(3, 2)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0

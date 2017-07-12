@@ -39,7 +39,8 @@ class MnistData(SyntheticData):
                 y = numpy.random.randint(0, im_size - height)
                 im[i, j, :, y:y+height, x:x+width] = mnist_im[j, :, :, :]
                 im[i, j, :, :, :] = self.random_shift(im[i, j, :, :, :], im_size/4)
-        mask = numpy.expand_dims(im.sum(2) > 0, 2)
+        mask = im.sum(2) > 0
+        mask = numpy.expand_dims(mask, 2)
         return im, mask
 
     def random_shift(self, im, max_shift):
@@ -54,15 +55,15 @@ class MnistData(SyntheticData):
 
     def get_next_batch(self, images):
         src_image, src_mask = self.generate_source_image(images)
-        im, motion = self.generate_data(src_image, src_mask)
-        return im, motion
+        im, motion, motion_label = self.generate_data(src_image, src_mask)
+        return im, motion, motion_label
 
 
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
     data = MnistData(args)
-    im, motion = data.get_next_batch(data.train_images)
+    im, motion, motion_label = data.get_next_batch(data.train_images)
     data.display(im, motion)
 
 if __name__ == '__main__':

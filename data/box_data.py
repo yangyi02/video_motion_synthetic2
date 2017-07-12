@@ -28,20 +28,21 @@ class BoxData(SyntheticData):
                     im[i, j, k, y:y+height, x:x+width] = color[k]
                 noise = numpy.random.rand(3, height, width) * self.fg_noise
                 im[i, j, :, y:y+height, x:x+width] = im[i, j, :, y:y+height, x:x+width] + noise
-        mask = numpy.expand_dims(im.sum(2) > 0, 2)
+        mask = im.sum(2) > 0
+        mask = numpy.expand_dims(mask, 2)
         return im, mask
 
     def get_next_batch(self, images=None):
         src_image, src_mask = self.generate_source_image()
-        im, motion = self.generate_data(src_image, src_mask)
-        return im, motion
+        im, motion, motion_label = self.generate_data(src_image, src_mask)
+        return im, motion, motion_label
 
 
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
     data = BoxData(args)
-    im, motion = data.get_next_batch()
+    im, motion, motion_label = data.get_next_batch()
     data.display(im, motion)
 
 if __name__ == '__main__':

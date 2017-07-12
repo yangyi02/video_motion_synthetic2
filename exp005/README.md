@@ -10,38 +10,27 @@
 
 | Exp  | Test | Gt   | EPE  | Note |
 | ---- | ---- | ---- | ---- | ---- | 
-| 01 |  |  |  | box, m_range=1 |
-| 02 |  |  |  | mnist, m_range=1 |
-| 03 |  |  |  | box, m_range=1, bg_move |
-| 04 |  |  |  | mnist, m_range=1, bg_move |
-| 05 |  |  |  | box, m_range=1, num_objects=2 |
-| 06 |  |  |  | mnist, m_range=1, num_objects=2 |
-| 07 |  |  |  | box, m_range=2 |
-| 08 |  |  |  | mnist, m_range=2 |
-| 09 |  |  |  | box, m_range=2, bg_move |
-| 10 |  |  |  | mnist, m_range=2, bg_move |
-| 11 |  |  |  | box, m_range=2, num_objects=2 |
-| 12 |  |  |  | mnist, m_range=2, num_objects=2 |
-| 13 |  |  |  | box, m_range=2, image_size=64 |
-| 14 |  |  |  | mnist, m_range=2, image_size=64 |
-| 15 |  |  |  | box, m_range=2, image_size=64, bg_move |
-| 16 |  |  |  | mnist, m_range=2, image_size=64, bg_move |
-| 17 |  |  |  | box, m_range=2, num_objects=2, image_size=64 |
-| 18 |  |  |  | mnist, m_range=2, num_objects=2, image_size=64 |
-| 19 |  |  |  | box, m_range=2, num_objects=2, num_frame=4 |
-
-| Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
-| ------------- | ----------- | ----------- | ----------- | 
-| 1 | 100 | 100 | box, m_range=1 |
-| 2 | 94 | 100 | box, m_range=2 |
-| 3 | 96 | 100 | mnist, m_range=2 |
-| 4 | 96 | 100 | mnist, m_range=2, image_size=64 |
-| 5 | 91 | 100 | box, m_range=2, image_size=64 | 
-| 6 | 82 | 94 | box, m_range=2, num_objects=2 |
-| 7 | 82 | 90 | mnist, m_range=2, num_objects=2 | 
-| 8 |    | | box, m_range=2, bg_move |
+| 01 | 99 | 100 | 0.19 | box, m_range=1 |
+| 02 | 95 | 100 | 0.17 | mnist, m_range=1 |
+| 03 | 99 | 96 | 0.26 | box, m_range=1, bg_move |
+| 04 | 98 | 96 | 0.20 | mnist, m_range=1, bg_move |
+| 05 | 85 | 97 | 0.12 | box, m_range=1, num_objects=2 |
+| 06 | 89 | 96 | 0.20 | mnist, m_range=1, num_objects=2 |
+| 07 | 95 | 100 | 0.43 | box, m_range=2 |
+| 08 | 96 | 100 | 0.69 | mnist, m_range=2 |
+| 09 | 96 | 93 | 1.87 | box, m_range=2, bg_move |
+| 10 | 92 | 91 | 2.25 | mnist, m_range=2, bg_move |
+| 11 | 82 | 94 | 0.81 | box, m_range=2, num_objects=2 |
+| 12 | 87 | 94 | 0.56 | mnist, m_range=2, num_objects=2 |
+| 13 | 91 | 100 |  | box, m_range=2, image_size=64 |
+| 14 | 96 | 100 |  | mnist, m_range=2, image_size=64 |
+| 15 |  | 96 |  | box, m_range=2, image_size=64, bg_move |
+| 16 |  | 97 |  | mnist, m_range=2, image_size=64, bg_move |
+| 17 |  | 95 |  | box, m_range=2, num_objects=2, image_size=64 |
+| 18 |  | 99 |  | mnist, m_range=2, num_objects=2, image_size=64 |
+| 19 |  | 95 |  | box, m_range=2, num_objects=2, num_frame=4 |
 
 ### Take Home Message
 
-- Does not work very good. 
+- Does not work. 
 - The neural network prefer to predict more places as occluded to decrease loss.

@@ -10,36 +10,25 @@
 
 | Exp  | Test | Gt   | EPE  | Note |
 | ---- | ---- | ---- | ---- | ---- | 
-| 01 |  |  |  | box, m_range=1 |
-| 02 |  |  |  | mnist, m_range=1 |
-| 03 |  |  |  | box, m_range=1, bg_move |
-| 04 |  |  |  | mnist, m_range=1, bg_move |
-| 05 |  |  |  | box, m_range=1, num_objects=2 |
-| 06 |  |  |  | mnist, m_range=1, num_objects=2 |
-| 07 |  |  |  | box, m_range=2 |
-| 08 |  |  |  | mnist, m_range=2 |
-| 09 |  |  |  | box, m_range=2, bg_move |
-| 10 |  |  |  | mnist, m_range=2, bg_move |
-| 11 |  |  |  | box, m_range=2, num_objects=2 |
-| 12 |  |  |  | mnist, m_range=2, num_objects=2 |
-| 13 |  |  |  | box, m_range=2, image_size=64 |
-| 14 |  |  |  | mnist, m_range=2, image_size=64 |
-| 15 |  |  |  | box, m_range=2, image_size=64, bg_move |
-| 16 |  |  |  | mnist, m_range=2, image_size=64, bg_move |
-| 17 |  |  |  | box, m_range=2, num_objects=2, image_size=64 |
-| 18 |  |  |  | mnist, m_range=2, num_objects=2, image_size=64 |
-| 19 |  |  |  | box, m_range=2, num_objects=2, num_frame=4 |
-
-| Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
-| ------------- | ----------- | ----------- | ----------- | 
-| 1 | 96 | 81 | box, m_range=1 |
-| 2 | 94 | 79 | box, m_range=2 |
-| 3 | 91 | 85 | mnist, m_range=2 |
-| 4 | 84 | 86 | mnist, m_range=2, image_size=64 |
-| 5 | 94 | 82 | box, m_range=2, image_size=64 | 
-| 6 | 87 | 78 | box, m_range=2, num_objects=2 |
-| 7 | 81 | 83 | mnist, m_range=2, num_objects=2 | 
-| 8 |    | | box, m_range=2, bg_move |
+| 01 | 94 | 81 | 0.02 | box, m_range=1 |
+| 02 | 93 | 91 | 0.02 | mnist, m_range=1 |
+| 03 | 99 | 96 | 0.04 | box, m_range=1, bg_move |
+| 04 | 97 | 96 | 0.05 | mnist, m_range=1, bg_move |
+| 05 | 87 | 80 | 0.07 | box, m_range=1, num_objects=2 |
+| 06 | 90 | 90 | 0.05 | mnist, m_range=1, num_objects=2 |
+| 07 | 93 | 80 | 0.08 | box, m_range=2 |
+| 08 | 91 | 86 | 0.09 | mnist, m_range=2 |
+| 09 | 98 | 94 | 0.13 | box, m_range=2, bg_move |
+| 10 | 96 | 93 | 0.15 | mnist, m_range=2, bg_move |
+| 11 | 87 | 78 | 0.19 | box, m_range=2, num_objects=2 |
+| 12 | 87 | 85 | 0.18 | mnist, m_range=2, num_objects=2 |
+| 13 | 94 | 82 |  | box, m_range=2, image_size=64 |
+| 14 | 84 | 86 |  | mnist, m_range=2, image_size=64 |
+| 15 |  | 97 |  | box, m_range=2, image_size=64, bg_move |
+| 16 |  | 98 |  | mnist, m_range=2, image_size=64, bg_move |
+| 17 |  | 81 |  | box, m_range=2, num_objects=2, image_size=64 |
+| 18 |  | 86 |  | mnist, m_range=2, num_objects=2, image_size=64 |
+| 19 |  | 80 |  | box, m_range=2, num_objects=2, num_frame=4 |
 
 ### Take Home Message
 

@@ -10,37 +10,26 @@
 
 | Exp  | Test | Gt   | EPE  | Note |
 | ---- | ---- | ---- | ---- | ---- |
-| 01 |  |  |  | box, m_range=1 |
-| 02 |  |  |  | mnist, m_range=1 |
-| 03 |  |  |  | box, m_range=1, bg_move |
-| 04 |  |  |  | mnist, m_range=1, bg_move |
-| 05 |  |  |  | box, m_range=1, num_objects=2 |
-| 06 |  |  |  | mnist, m_range=1, num_objects=2 |
-| 07 |  |  |  | box, m_range=2 |
-| 08 |  |  |  | mnist, m_range=2 |
-| 09 |  |  |  | box, m_range=2, bg_move |
-| 10 |  |  |  | mnist, m_range=2, bg_move |
-| 11 |  |  |  | box, m_range=2, num_objects=2 |
-| 12 |  |  |  | mnist, m_range=2, num_objects=2 |
-| 13 |  |  |  | box, m_range=2, image_size=64 |
-| 14 |  |  |  | mnist, m_range=2, image_size=64 |
-| 15 |  |  |  | box, m_range=2, image_size=64, bg_move |
-| 16 |  |  |  | mnist, m_range=2, image_size=64, bg_move |
-| 17 |  |  |  | box, m_range=2, num_objects=2, image_size=64 |
-| 18 |  |  |  | mnist, m_range=2, num_objects=2, image_size=64 |
-| 19 |  |  |  | box, m_range=2, num_objects=2, num_frame=4 |
-
-| Exp | Test Loss Improve (%) | Gt Loss Improve (%) | Note |
-| ------------- | ----------- | ----------- | ----------- | 
-| 1 | 100 | 100 | box, m_range=1 |
-| 2 | 92 | 100 | box, m_range=2 |
-| 3 | 98 | 100 | mnist, m_range=2 |
-| 4 | 88 | 100 | mnist, m_range=2, image_size=64 |
-| 5 | 99 | 100 | box, m_range=2, image_size=64 | 
-| 6 | 88 | 94 | box, m_range=2, num_objects=2 |
-| 7 | 86 | 90 | mnist, m_range=2, num_objects=2 |  
-| 8 |    |    | box, m_range=2, bg_move |
+| 01 | 100 | 100 | 0.00 | box, m_range=1 |
+| 02 | 98 | 100 | 0.01 | mnist, m_range=1 |
+| 03 | 100 | 96 | 0.02 | box, m_range=1, bg_move |
+| 04 | 98 | 96 | 0.05 | mnist, m_range=1, bg_move |
+| 05 | 89 | 97 | 0.05 | box, m_range=1, num_objects=2 |
+| 06 | 91 | 96 | 0.03 | mnist, m_range=1, num_objects=2 |
+| 07 | 94 | 100 | 0.27 | box, m_range=2 |
+| 08 | 98 | 100 | 0.33 | mnist, m_range=2 |
+| 09 | 86 | 93 | 1.68 | box, m_range=2, bg_move |
+| 10 | 87 | 91 | 1.74 | mnist, m_range=2, bg_move |
+| 11 | 88 | 94 | 0.15 | box, m_range=2, num_objects=2 |
+| 12 | 90 | 93 | 0.33 | mnist, m_range=2, num_objects=2 |
+| 13 | 99 | 100 |  | box, m_range=2, image_size=64 |
+| 14 | 88 | 100 |  | mnist, m_range=2, image_size=64 |
+| 15 |  | 96 |  | box, m_range=2, image_size=64, bg_move |
+| 16 |  | 97 |  | mnist, m_range=2, image_size=64, bg_move |
+| 17 |  | 95 |  | box, m_range=2, num_objects=2, image_size=64 |
+| 18 |  | 98 |  | mnist, m_range=2, num_objects=2, image_size=64 |
+| 19 |  | 95 |  | box, m_range=2, num_objects=2, num_frame=4 |
 
 ### Take Home Message
 
-- Although this significantly improves test loss, the optical flow estimation actually becomes slightly worse. 
+- Although this significantly improves test loss, the optical flow estimation actually becomes much worse. 

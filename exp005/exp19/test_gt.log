@@ -1,0 +1,4 @@
+[INFO 2017-07-12 11:21:38,449 demo.py:151] Namespace(batch_size=64, bg_move=False, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=2, num_frame=4, num_objects=2, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
+[INFO 2017-07-12 11:21:44,950 demo.py:142] average ground truth test loss: 486.11, base loss: 9715.90
+[INFO 2017-07-12 11:21:44,950 demo.py:143] improve_loss: 9229.79, improve_percent: 0.95
+[INFO 2017-07-12 11:21:44,950 demo.py:145] average ground truth test endpoint error: 0.00

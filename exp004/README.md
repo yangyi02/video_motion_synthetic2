@@ -33,4 +33,5 @@
 
 ### Take Home Message
 
+- Slightly better than not decomposing when number of objects is 2.
 - When motion range is small, the benefit for decomposing x and y is not evident 

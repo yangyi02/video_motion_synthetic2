@@ -32,4 +32,6 @@
 
 ### Take Home Message
 
-- Although this significantly improves test loss, the optical flow estimation actually becomes much worse. 
+- Although this significantly improves test loss, the optical flow estimation actually becomes much worse when motion range is larger than 1.
+- It is interesting to see when motion range is limited to 1, this helps on motion prediction.
+- However, once motion range is increased to 2, the model significantly degenerate to a very bad local optimal.

@@ -32,3 +32,5 @@
 
 ### Take Home Message
 
+- Although this is not a perfect model, but significantly than baseline exp001, even when background moves or 2 objects overlap.
+- Visualization suggests this is a good baseline.

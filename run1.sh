@@ -1,6 +1,6 @@
-# cd exp001
-# sh run1.sh
-# cd ..
+cd exp001
+sh run1.sh
+cd ..
 cd exp002
 sh run1.sh
 cd ..

@@ -34,3 +34,4 @@
 
 - Does not work. 
 - The neural network prefer to predict more places as occluded to decrease loss.
+- The motion estimation accuracy is significantly worse. 

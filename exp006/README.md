@@ -32,6 +32,7 @@
 
 ### Take Home Message
 
+- Significantly Better than exp005.
 - Does not work. No matter how you design loss, the final result on occlusion boundary is not good.
 - We still need a better model on occlusion.
 - However, compared to Exp005, it is happy to see the model never over-estimate occlusion in the background boundary.

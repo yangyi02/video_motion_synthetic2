@@ -22,14 +22,17 @@
 | 10 | 82 | 77 | 0.22 | mnist, m_range=2, bg_move |
 | 11 | 68 | 36 | 0.26 | box, m_range=2, num_objects=2 |
 | 12 | 72 | 58 | 0.26 | mnist, m_range=2, num_objects=2 |
-| 13 | 81 | 63 |    | box, m_range=2, image_size=64 |
-| 14 | 82 | 68 |    | mnist, m_range=2, image_size=64 |
-| 15 |    | 87 |    | box, m_range=2, image_size=64, bg_move |
-| 16 |    | 91 |    | mnist, m_range=2, image_size=64, bg_move |
-| 17 |    | 44 |    | box, m_range=2, num_objects=2, image_size=64 |
-| 18 |    | 65 |    | mnist, m_range=2, num_objects=2, image_size=64 |
-| 19 |    | 40 |    | box, m_range=2, num_objects=2, num_frame=4 |
+| 13 | 82 | 63 | 0.11 | box, m_range=2, image_size=64 |
+| 14 | 82 | 68 | 0.03 | mnist, m_range=2, image_size=64 |
+| 15 |    | 87 |      | box, m_range=2, image_size=64, bg_move |
+| 16 |    | 91 |      | mnist, m_range=2, image_size=64, bg_move |
+| 17 |    | 44 |      | box, m_range=2, num_objects=2, image_size=64 |
+| 18 |    | 66 |      | mnist, m_range=2, num_objects=2, image_size=64 |
+| 19 |    | 40 |      | box, m_range=2, num_objects=2, num_frame=4 |
 
 ### Take Home Message
 
-- Improving better than ground truth loss suggests this is not a correct model
+- Predicted motion improves reconstruction loss better than using ground truth motion, suggesting this is not a correct model.
+- Visualization suggests the error occurs mostly at the occlusion boundary.
+- Visualization suggests this is still a good baseline.
+- The reason that EPE in exp14 is small is because the Mnist digits are very small compared to static background. 

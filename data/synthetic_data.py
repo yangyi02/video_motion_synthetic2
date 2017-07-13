@@ -67,9 +67,9 @@ class SyntheticData(object):
         im_mask = numpy.concatenate((mask, mask, mask), 2)
         fg_im[im_mask] = bg_im[im_mask]
         # swap axes between bacth size and frame
-        im, motion, motion_label = \
-            fg_im.swapaxes(0, 1), fg_motion.swapaxes(0, 1), fg_motion_label.swapaxes(0, 1)
-        return im, motion.astype(int), motion_label.astype(int)
+        im, motion, motion_label, seg_layer = fg_im.swapaxes(0, 1), fg_motion.swapaxes(0, 1), \
+            fg_motion_label.swapaxes(0, 1), fg_mask.swapaxes(0, 1)
+        return im, motion.astype(int), motion_label.astype(int), seg_layer.astype(int)
 
     def generate_motion(self, num_objects, src_mask=None):
         batch_size, im_size = self.batch_size, self.im_size
@@ -207,9 +207,9 @@ class SyntheticData(object):
             im_new[i, :, :, :] = im_big[i, :, y:y + im_size, x:x + im_size]
         return im_new
 
-    def display(self, im, motion):
+    def display(self, im, motion, seg_layer):
         num_frame = self.num_frame
-        width, height = self.visualizer.get_img_size(3, num_frame)
+        width, height = self.visualizer.get_img_size(4, num_frame)
         img = numpy.ones((height, width, 3))
         prev_im = None
         for i in range(num_frame):
@@ -227,6 +227,12 @@ class SyntheticData(object):
             optical_flow = flowlib.visualize_flow(flow, self.m_range)
             x1, y1, x2, y2 = self.visualizer.get_img_coordinate(3, i + 1)
             img[y1:y2, x1:x2, :] = optical_flow / 255.0
+
+            seg = seg_layer[0, i, :, :, :].squeeze() * 1.0 / seg_layer[0, i, :, :, :].max().astype(numpy.float)
+            cmap = plt.get_cmap('jet')
+            seg_map = cmap(seg)[:, :, 0:3]
+            x1, y1, x2, y2 = self.visualizer.get_img_coordinate(4, i + 1)
+            img[y1:y2, x1:x2, :] = seg_map
 
         if self.save_display:
             img = img * 255.0

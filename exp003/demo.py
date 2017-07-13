@@ -39,7 +39,7 @@ class Demo(BaseDemo):
         base_loss, train_loss = [], []
         for epoch in range(self.train_epoch):
             optimizer.zero_grad()
-            im, _, _ = self.data.get_next_batch(self.data.train_images)
+            im, _, _, _ = self.data.get_next_batch(self.data.train_images)
             im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
             im_output = im[:, -1, :, :, :]
             im_input = Variable(torch.from_numpy(im_input).float())
@@ -70,7 +70,7 @@ class Demo(BaseDemo):
         base_loss, test_loss = [], []
         test_epe = []
         for epoch in range(self.test_epoch):
-            im, motion, _ = self.data.get_next_batch(self.data.test_images)
+            im, motion, _, _ = self.data.get_next_batch(self.data.test_images)
             im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
             im_output = im[:, -1, :, :, :]
             gt_motion = motion[:, -2, :, :, :]
@@ -108,7 +108,7 @@ class Demo(BaseDemo):
         base_loss, test_loss = [], []
         test_epe = []
         for epoch in range(self.test_epoch):
-            im, motion, motion_label = self.data.get_next_batch(self.data.test_images)
+            im, motion, motion_label, _ = self.data.get_next_batch(self.data.test_images)
             im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
             im_output = im[:, -1, :, :, :]
             gt_motion = motion[:, -2, :, :, :]

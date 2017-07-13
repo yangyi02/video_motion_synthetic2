@@ -27,8 +27,10 @@ class MnistData(SyntheticData):
         return train_images, test_images
 
     def generate_source_image(self, images):
+        max_shift = self.im_size / 4
         batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
         im = numpy.zeros((num_objects, batch_size, 3, im_size, im_size))
+        mask = numpy.zeros((num_objects, batch_size, 1, im_size, im_size))
         for i in range(num_objects):
             idx = numpy.random.permutation(images.shape[0])
             mnist_im = images[idx[0:batch_size], :, :, :]
@@ -38,33 +40,35 @@ class MnistData(SyntheticData):
                 x = numpy.random.randint(0, im_size - width)
                 y = numpy.random.randint(0, im_size - height)
                 im[i, j, :, y:y+height, x:x+width] = mnist_im[j, :, :, :]
-                im[i, j, :, :, :] = self.random_shift(im[i, j, :, :, :], im_size/4)
-        mask = im.sum(2) > 0
-        mask = numpy.expand_dims(mask, 2)
+                nonzero_mask = im[i, j, :, :, :].sum(0) > 0
+                mask[i, j, 0, nonzero_mask] = num_objects - i
+                shift = numpy.random.randint(-max_shift, max_shift, size=2)
+                im[i, j, :, :, :] = self.shift_image(im[i, j, :, :, :], shift, max_shift)
+                mask[i, j, :, :, :] = self.shift_image(mask[i, j, :, :, :], shift, max_shift)
         return im, mask
 
-    def random_shift(self, im, max_shift):
-        batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
-        shift = numpy.random.randint(-max_shift, max_shift, size=2)
-        im_big = numpy.zeros((3, im_size + 2 * max_shift, im_size + 2 * max_shift))
+    @staticmethod
+    def shift_image(im, shift, max_shift):
+        [im_channel, im_height, im_width] = im.shape
+        im_big = numpy.zeros((im_channel, im_height + 2 * max_shift, im_width + 2 * max_shift))
         im_big[:, max_shift:-max_shift, max_shift:-max_shift] = im
         x = max_shift + shift[0]
         y = max_shift + shift[1]
-        im = im_big[:, y:y + im_size, x:x+im_size]
+        im = im_big[:, y:y + im_height, x:x + im_width]
         return im
 
     def get_next_batch(self, images):
         src_image, src_mask = self.generate_source_image(images)
-        im, motion, motion_label = self.generate_data(src_image, src_mask)
-        return im, motion, motion_label
+        im, motion, motion_label, seg_layer = self.generate_data(src_image, src_mask)
+        return im, motion, motion_label, seg_layer
 
 
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
     data = MnistData(args)
-    im, motion, motion_label = data.get_next_batch(data.train_images)
-    data.display(im, motion)
+    im, motion, motion_label, seg_layer = data.get_next_batch(data.train_images)
+    data.display(im, motion, seg_layer)
 
 if __name__ == '__main__':
     unit_test()

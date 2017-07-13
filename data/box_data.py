@@ -17,6 +17,7 @@ class BoxData(SyntheticData):
     def generate_source_image(self):
         batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
         im = numpy.zeros((num_objects, batch_size, 3, im_size, im_size))
+        mask = numpy.zeros((num_objects, batch_size, 1, im_size, im_size))
         for i in range(num_objects):
             for j in range(batch_size):
                 width = numpy.random.randint(im_size/8, im_size*3/4)
@@ -28,22 +29,21 @@ class BoxData(SyntheticData):
                     im[i, j, k, y:y+height, x:x+width] = color[k]
                 noise = numpy.random.rand(3, height, width) * self.fg_noise
                 im[i, j, :, y:y+height, x:x+width] = im[i, j, :, y:y+height, x:x+width] + noise
-        mask = im.sum(2) > 0
-        mask = numpy.expand_dims(mask, 2)
+                mask[i, j, 0, y:y+height, x:x+width] = num_objects - i
         return im, mask
 
     def get_next_batch(self, images=None):
         src_image, src_mask = self.generate_source_image()
-        im, motion, motion_label = self.generate_data(src_image, src_mask)
-        return im, motion, motion_label
+        im, motion, motion_label, seg_layer = self.generate_data(src_image, src_mask)
+        return im, motion, motion_label, seg_layer
 
 
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
     data = BoxData(args)
-    im, motion, motion_label = data.get_next_batch()
-    data.display(im, motion)
+    im, motion, motion_label, seg_layer = data.get_next_batch()
+    data.display(im, motion, seg_layer)
 
 if __name__ == '__main__':
     unit_test()

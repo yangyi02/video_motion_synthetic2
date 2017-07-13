@@ -11,18 +11,18 @@
 
 | Exp  | Test | Gt   | EPE  | Note |
 | ---- | ---- | ---- | ---- | ---- | 
-| 01 |  | 100 |  | box, m_range=1 |
-| 02 |  | 100 |  | mnist, m_range=1 |
-| 03 |  | 100 |  | box, m_range=1, bg_move |
-| 04 |  | 100 |  | mnist, m_range=1, bg_move |
-| 05 |  | 99 |  | box, m_range=1, num_objects=2 |
-| 06 |  | 100 |  | mnist, m_range=1, num_objects=2 |
-| 07 |  | 100 |  | box, m_range=2 |
-| 08 |  | 100 |  | mnist, m_range=2 |
-| 09 |  | 100 |  | box, m_range=2, bg_move |
-| 10 |  | 100 |  | mnist, m_range=2, bg_move |
-| 11 |  | 99 |  | box, m_range=2, num_objects=2 |
-| 12 |  | 99 |  | mnist, m_range=2, num_objects=2 |
+| 01 | 97 | 100 | 0.08 | box, m_range=1 |
+| 02 | 98 | 100 | 0.01 | mnist, m_range=1 |
+| 03 | 100 | 100 | 0.00 | box, m_range=1, bg_move |
+| 04 | 99 | 100 | 0.02 | mnist, m_range=1, bg_move |
+| 05 | 90 | 99 | 0.05 | box, m_range=1, num_objects=2 |
+| 06 | 94 | 100 | 0.04 | mnist, m_range=1, num_objects=2 |
+| 07 | 97 | 100 | 0.05 | box, m_range=2 |
+| 08 | 95 | 100 | 0.22 | mnist, m_range=2 |
+| 09 | 98 | 100 | 0.28 | box, m_range=2, bg_move |
+| 10 | 99 | 100 | 0.05 | mnist, m_range=2, bg_move |
+| 11 | 89 | 99 | 0.13 | box, m_range=2, num_objects=2 |
+| 12 | 95 | 99 | 0.94 | mnist, m_range=2, num_objects=2 |
 | 13 |  | 100 |  | box, m_range=2, image_size=64 |
 | 14 |  | 100 |  | mnist, m_range=2, image_size=64 |
 | 15 |  | 100 |  | box, m_range=2, image_size=64, bg_move |

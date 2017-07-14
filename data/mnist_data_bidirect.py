@@ -27,8 +27,10 @@ class MnistDataBidirect(SyntheticDataBidirect):
         return train_images, test_images
 
     def generate_source_image(self, images):
+        max_shift = self.im_size / 4
         batch_size, num_objects, im_size = self.batch_size, self.num_objects, self.im_size
         im = numpy.zeros((num_objects, batch_size, 3, im_size, im_size))
+        mask = numpy.zeros((num_objects, batch_size, 1, im_size, im_size))
         for i in range(num_objects):
             idx = numpy.random.permutation(images.shape[0])
             mnist_im = images[idx[0:batch_size], :, :, :]
@@ -38,21 +40,35 @@ class MnistDataBidirect(SyntheticDataBidirect):
                 x = numpy.random.randint(0, im_size - width)
                 y = numpy.random.randint(0, im_size - height)
                 im[i, j, :, y:y+height, x:x+width] = mnist_im[j, :, :, :]
-        mask = numpy.expand_dims(im.sum(2) > 0, 2)
+                nonzero_mask = im[i, j, :, :, :].sum(0) > 0
+                mask[i, j, 0, nonzero_mask] = num_objects - i
+                shift = numpy.random.randint(-max_shift, max_shift, size=2)
+                im[i, j, :, :, :] = self.shift_image(im[i, j, :, :, :], shift, max_shift)
+                mask[i, j, :, :, :] = self.shift_image(mask[i, j, :, :, :], shift, max_shift)
         return im, mask
+
+    @staticmethod
+    def shift_image(im, shift, max_shift):
+        [im_channel, im_height, im_width] = im.shape
+        im_big = numpy.zeros((im_channel, im_height + 2 * max_shift, im_width + 2 * max_shift))
+        im_big[:, max_shift:-max_shift, max_shift:-max_shift] = im
+        x = max_shift + shift[0]
+        y = max_shift + shift[1]
+        im = im_big[:, y:y + im_height, x:x + im_width]
+        return im
 
     def get_next_batch(self, images):
         src_image, src_mask = self.generate_source_image(images)
-        im, motion, motion_r = self.generate_data(src_image, src_mask)
-        return im, motion, motion_r
+        im, motion, motion_r, motion_label, motion_label_r, seg_layer = self.generate_data(src_image, src_mask)
+        return im, motion, motion_r, motion_label, motion_label_r, seg_layer
 
 
 def unit_test():
     args = learning_args.parse_args()
     logging.info(args)
     data = MnistDataBidirect(args)
-    im, motion, motion_r = data.get_next_batch(data.train_images)
-    data.display(im, motion, motion_r)
+    im, motion, motion_r, motion_label, motion_label_r, seg_layer = data.get_next_batch(data.train_images)
+    data.display(im, motion, motion_r, seg_layer)
 
 if __name__ == '__main__':
     unit_test()

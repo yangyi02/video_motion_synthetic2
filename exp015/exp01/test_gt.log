@@ -1,0 +1,9 @@
+[INFO 2017-07-13 18:15:52,352 demo.py:161] Namespace(batch_size=64, bg_move=False, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=1, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
+Traceback (most recent call last):
+  File "../demo.py", line 171, in <module>
+    main()
+  File "../demo.py", line 168, in main
+    demo.test_gt_unsupervised()
+  File "../demo.py", line 147, in test_gt_unsupervised
+    depth, gt_depth, appear, conflict, 'test_gt.png')
+TypeError: visualize_result() takes at most 9 arguments (11 given)

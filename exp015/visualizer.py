@@ -66,12 +66,14 @@ class Visualizer(BaseVisualizer):
         img[y1:y2, x1:x2, :] = conflict_map
 
         depth = depth[0].cpu().data.numpy().squeeze()
+        depth = depth * 1.0 / depth.max()
         cmap = plt.get_cmap('jet')
         depth_map = cmap(depth)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(3, 4)
         img[y1:y2, x1:x2, :] = depth_map
 
         depth = gt_depth[0].cpu().data.numpy().squeeze()
+        depth = depth * 1.0 / depth.max()
         cmap = plt.get_cmap('jet')
         depth_map = cmap(depth)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(3, 5)

@@ -79,11 +79,11 @@ class Net(nn.Module):
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11(self.conv11(x11)))
         m_mask = F.softmax(self.conv(x11))
-        depth = F.relu(self.conv_depth(x11))
+        depth = F.sigmoid(self.conv_depth(x11))
 
-        nearby_occl = seg2occl(depth, m_mask, self.m_kernel, self.m_range)
+        occl = seg2occl(depth, m_mask, self.m_kernel, self.m_range)
         im = im_input[:, -self.im_channel:, :, :]
-        pred, unocclude = construct_image(im, m_mask, nearby_occl, self.m_kernel, self.m_range)
+        pred, unocclude = construct_image(im, m_mask, occl, self.m_kernel, self.m_range)
         appear = F.relu(1 - unocclude.sum(1))
         conflict = F.relu(unocclude.sum(1) - 1)
         return pred, m_mask, depth, appear, conflict
@@ -104,9 +104,9 @@ class GtNet(nn.Module):
 
     def forward(self, im_input, gt_motion, depth):
         m_mask = self.label2mask(gt_motion, self.n_class)
-        nearby_occl = seg2occl(depth, m_mask, self.m_kernel, self.m_range)
+        occl = seg2occl(depth, m_mask, self.m_kernel, self.m_range)
         im = im_input[:, -self.im_channel:, :, :]
-        pred, unocclude = construct_image(im, m_mask, nearby_occl, self.m_kernel, self.m_range)
+        pred, unocclude = construct_image(im, m_mask, occl, self.m_kernel, self.m_range)
         appear = F.relu(1 - unocclude.sum(1))
         conflict = F.relu(unocclude.sum(1) - 1)
         return pred, m_mask, depth, appear, conflict
@@ -130,20 +130,20 @@ def seg2occl(depth, m_mask, m_kernel, m_range):
     nearby_seg = F.conv2d(seg_expand, m_kernel, None, 1, m_range, 1, m_kernel.size(0))
     m_mask = F.conv2d(m_mask, m_kernel, None, 1, m_range, 1, m_kernel.size(0))
     seg_max, _ = torch.max(nearby_seg * m_mask, 1)
-    nearby_occl = nearby_seg - seg_max.expand_as(nearby_seg)
-    nearby_occl = nearby_occl + 1
-    nearby_occl = F.relu(nearby_occl)
-    return nearby_occl
+    occl = nearby_seg * m_mask - seg_max.expand_as(nearby_seg)
+    occl = occl + 1
+    occl = F.relu(occl)
+    return occl
 
 
-def construct_image(im, m_mask, nearby_occl, m_kernel, m_range):
+def construct_image(im, m_mask, occl, m_kernel, m_range):
     new_mask = F.conv2d(m_mask, m_kernel, None, 1, m_range, 1, m_kernel.size(0))
-    unocclude_mask = new_mask * nearby_occl
+    unocclude_mask = new_mask * occl
     pred = Variable(torch.Tensor(im.size()))
     if torch.cuda.is_available():
         pred = pred.cuda()
-    for j in range(im.size(1)):
-        im_expand = im[:, j, :, :].unsqueeze(1).expand_as(m_mask)
+    for i in range(im.size(1)):
+        im_expand = im[:, i, :, :].unsqueeze(1).expand_as(m_mask)
         nearby_im = F.conv2d(im_expand, m_kernel, None, 1, m_range, 1, m_kernel.size(0))
-        pred[:, j, :, :] = (nearby_im * unocclude_mask).sum(1)
+        pred[:, i, :, :] = (nearby_im * unocclude_mask).sum(1)
     return pred, unocclude_mask

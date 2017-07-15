@@ -1,5 +1,6 @@
 ## Reconstruction Consider Moving Pixels Occlude Static Pixels
 
+- Baseline: Exp001
 - Occlusion modeling, moving pixels will occlude static pixels
 - Predict motion for every pixel
 - Photometric loss for every pixel

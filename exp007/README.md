@@ -1,5 +1,6 @@
 ## Same as Exp006 But Use Pixel Average for Occlusion Place 
 
+- Baseline: Exp006
 - No Occlusion modeling, predict conflict pixel values as the average between all coming pixels
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded, then divided by the total number of existing pixels

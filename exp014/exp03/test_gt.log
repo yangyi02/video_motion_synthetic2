@@ -1,4 +1,4 @@
-[INFO 2017-07-13 17:57:43,635 demo.py:155] Namespace(batch_size=64, bg_move=True, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=1, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
-[INFO 2017-07-13 17:57:47,470 demo.py:146] average ground truth test loss: 3066.72, base loss: 27556.69
-[INFO 2017-07-13 17:57:47,471 demo.py:147] improve_loss: 24489.96, improve_percent: 0.89
-[INFO 2017-07-13 17:57:47,471 demo.py:149] average ground truth test endpoint error: 0.00
+[INFO 2017-07-15 13:27:47,802 demo.py:155] Namespace(batch_size=64, bg_move=True, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='', learning_rate=0.001, method='unsupervised', motion_range=1, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=False, test_epoch=10, test_gt=True, test_interval=100, train=False, train_epoch=1000)
+[INFO 2017-07-15 13:27:51,636 demo.py:146] average ground truth test loss: 3061.24, base loss: 27633.75
+[INFO 2017-07-15 13:27:51,636 demo.py:147] improve_loss: 24572.51, improve_percent: 0.89
+[INFO 2017-07-15 13:27:51,636 demo.py:149] average ground truth test endpoint error: 0.00

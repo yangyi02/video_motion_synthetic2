@@ -1,5 +1,6 @@
 ## Same as Exp003 But Using Neural Nets to Predict Occlusion
 
+- Baseline: Exp003
 - Occlusion modeling, predict occlusion using neural nets instead of derived from motion
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded

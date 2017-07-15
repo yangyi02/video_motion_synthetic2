@@ -1,5 +1,6 @@
 ## Same Model as Exp002 But Loss Consider New Appear Pixels
 
+- Baseline: Exp002
 - Occlusion modeling, moving pixels will occlude static pixels
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded

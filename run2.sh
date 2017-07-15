@@ -1,3 +1,6 @@
+cd exp020
+sh run1.sh
+cd ..
 cd exp019
 sh run1.sh
 cd ..

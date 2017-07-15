@@ -1,5 +1,6 @@
 ## Same as Exp005 But Divide Loss with Number of Existing Pixels
 
+- Baseline: Exp005
 - Occlusion modeling, predict occlusion using neural nets instead of derived from motion
 - Predict motion for every pixel
 - Photometric loss for pixels that are not occluded, then divided by the total number of existing pixels

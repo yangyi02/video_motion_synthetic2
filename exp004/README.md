@@ -1,5 +1,6 @@
 ## Same as Exp002 But Motion Kernel Separate as x and y
 
+- Baseline: Exp002
 - Occlusion modeling, moving pixels will occlude static pixels
 - Predict motion for every pixel
 - Photometric loss for every pixel

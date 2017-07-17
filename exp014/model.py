@@ -103,6 +103,9 @@ class GtNet(nn.Module):
             self.m_kernel = self.m_kernel.cuda()
 
     def forward(self, im_input, gt_motion, depth):
+        """
+        Note: this is not the true GTNet forward because depth is not really used.
+        """
         m_mask = self.label2mask(gt_motion, self.n_class)
         occl = seg2occl(depth, m_mask, self.m_kernel, self.m_range)
         im = im_input[:, -self.im_channel:, :, :]

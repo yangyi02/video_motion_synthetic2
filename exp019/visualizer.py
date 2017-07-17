@@ -13,7 +13,7 @@ class Visualizer(BaseVisualizer):
 
     def visualize_result(self, im_input, im_output, im_pred, pred_motion, gt_motion,
                          depth, gt_depth, appear, conflict, file_name='tmp.png'):
-        width, height = self.get_img_size(3, max(self.num_frame + 1, 5))
+        width, height = self.get_img_size(3, max(self.num_frame + 2, 5))
         img = numpy.ones((height, width, 3))
         prev_im = None
         for i in range(self.num_frame - 1):
@@ -78,6 +78,10 @@ class Visualizer(BaseVisualizer):
         depth_map = cmap(depth)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(3, 5)
         img[y1:y2, x1:x2, :] = depth_map
+
+        im_diff = numpy.expand_dims(1 - appear, 2).repeat(3, 2) * numpy.abs(pred - im_output)
+        x1, y1, x2, y2 = self.get_img_coordinate(2, self.num_frame + 2)
+        img[y1:y2, x1:x2, :] = im_diff
 
         if self.save_display:
             img = img * 255.0

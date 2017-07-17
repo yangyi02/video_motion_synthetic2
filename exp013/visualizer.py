@@ -116,3 +116,4 @@ class Visualizer(BaseVisualizer):
             plt.imshow(img)
             plt.axis('off')
             plt.show()
+

@@ -46,9 +46,9 @@ class Demo(BaseDemo):
             im_output = Variable(torch.from_numpy(im_output).float())
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
-            im_pred, m_mask, occlude, unocclude = self.model(im_input)
-            im_diff = unocclude.expand_as(im_output) * (im_pred - im_output)
-            im_diff = im_diff / unocclude.sum(3).sum(2).expand_as(im_diff)
+            im_pred, m_mask, disappear, appear = self.model(im_input)
+            im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
+            im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
             loss.backward()
             optimizer.step()
@@ -81,9 +81,9 @@ class Demo(BaseDemo):
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
                 gt_motion = gt_motion.cuda()
-            im_pred, m_mask, occlude, unocclude = self.model(im_input)
-            im_diff = unocclude.expand_as(im_output) * (im_pred - im_output)
-            im_diff = im_diff / unocclude.sum(3).sum(2).expand_as(im_diff)
+            im_pred, m_mask, disappear, appear = self.model(im_input)
+            im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
+            im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
 
             test_loss.append(loss.data[0])
@@ -95,7 +95,7 @@ class Demo(BaseDemo):
             test_epe.append(epe.cpu().data[0])
             if self.display:
                 self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion,
-                                                 unocclude, occlude, 'test_%d.png' % epoch)
+                                                 disappear, appear, 'test_%d.png' % epoch)
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss
@@ -110,22 +110,25 @@ class Demo(BaseDemo):
         base_loss, test_loss = [], []
         test_epe = []
         for epoch in range(self.test_epoch):
-            im, motion, motion_label, _ = self.data.get_next_batch(self.data.test_images)
+            im, motion, motion_label, gt_depth = self.data.get_next_batch(self.data.test_images)
             im_input = im[:, :-1, :, :, :].reshape(self.batch_size, -1, self.im_size, self.im_size)
             im_output = im[:, -1, :, :, :]
             gt_motion = motion[:, -2, :, :, :]
             gt_motion_label = motion_label[:, -2, :, :, :]
+            gt_depth = gt_depth[:, -2, :, :, :]
             im_input = Variable(torch.from_numpy(im_input).float())
             im_output = Variable(torch.from_numpy(im_output).float())
             gt_motion = Variable(torch.from_numpy(gt_motion).float())
             gt_motion_label = Variable(torch.from_numpy(gt_motion_label))
+            gt_depth = Variable(torch.from_numpy(gt_depth).float())
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
                 gt_motion = gt_motion.cuda()
                 gt_motion_label = gt_motion_label.cuda()
-            im_pred, m_mask, occlude, unocclude = self.model_gt(im_input, gt_motion_label)
-            im_diff = unocclude.expand_as(im_output) * (im_pred - im_output)
-            im_diff = im_diff / unocclude.sum(3).sum(2).expand_as(im_diff)
+                gt_depth = gt_depth.cuda()
+            im_pred, m_mask, disappear, appear = self.model_gt(im_input, gt_motion_label, gt_depth)
+            im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
+            im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
 
             test_loss.append(loss.data[0])
@@ -137,7 +140,7 @@ class Demo(BaseDemo):
             test_epe.append(epe.cpu().data[0])
             if self.display:
                 self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion,
-                                                 unocclude, occlude, 'test_gt.png')
+                                                 disappear, appear, 'test_gt.png')
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss

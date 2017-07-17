@@ -15,15 +15,15 @@
 | ---- | ---- | ---- | ---- | ---- | 
 | 01 | 100 | 100 | 0.00 | box, m_range=1 |
 | 02 | 96 | 100 | 0.05 | mnist, m_range=1 |
-| 03 | 100 | 100 | 0.01 | box, m_range=1, bg_move |
+| 03 | 100 | 100 | 0.00 | box, m_range=1, bg_move |
 | 04 | 98 | 100 | 0.06 | mnist, m_range=1, bg_move |
-| 05 | 79 | 99 | 0.08 | box, m_range=1, num_objects=2 |
+| 05 | 78 | 99 | 0.07 | box, m_range=1, num_objects=2 |
 | 06 | 79 | 99 | 0.07 | mnist, m_range=1, num_objects=2 |
 | 07 | 99 | 100 | 0.01 | box, m_range=2 |
-| 08 | 92 | 100 | 0.08 | mnist, m_range=2 |
+| 08 | 92 | 100 | 0.07 | mnist, m_range=2 |
 | 09 | 99 | 100 | 0.02 | box, m_range=2, bg_move |
 | 10 | 97 | 100 | 0.06 | mnist, m_range=2, bg_move |
-| 11 | 77 | 98 | 0.20 | box, m_range=2, num_objects=2 |
+| 11 | 76 | 98 | 0.22 | box, m_range=2, num_objects=2 |
 | 12 | 78 | 98 | 0.21 | mnist, m_range=2, num_objects=2 |
 | 13 |  |  |  | box, m_range=2, image_size=64 |
 | 14 |  |  |  | mnist, m_range=2, image_size=64 |

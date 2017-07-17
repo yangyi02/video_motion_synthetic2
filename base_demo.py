@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from learning_args import parse_args
 from data.mnist_data import MnistData
 from data.box_data import BoxData
+from data.box_mnist_data import BoxMnistData
 from base_model import BaseNet, BaseGtNet
 from visualize.base_visualizer import BaseVisualizer
 import logging
@@ -33,6 +34,8 @@ class BaseDemo(object):
             self.data = BoxData(args)
         elif args.data == 'mnist':
             self.data = MnistData(args)
+        elif args.data == 'box_mnist':
+            self.data = BoxMnistData(args)
         self.init_model_path = args.init_model_path
         self.model, self.model_gt = self.init_model(self.data.m_kernel)
         self.visualizer = BaseVisualizer(args, self.data.reverse_m_dict)

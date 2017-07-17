@@ -13,8 +13,8 @@ class Visualizer(BaseVisualizer):
         self.num_inputs = (self.num_frame - 1) / 2
 
     def visualize_result_bidirect(self, im_input_f, im_input_b, im_output, im_pred, pred_motion_f,
-                                  gt_motion_f, occlude_f, attn_f, pred_motion_b, gt_motion_b,
-                                  occlude_b, attn_b, file_name='tmp.png'):
+                                  gt_motion_f, disappear_f, attn_f, pred_motion_b, gt_motion_b,
+                                  disappear_b, attn_b, file_name='tmp.png'):
         width, height = self.get_img_size(4, max(self.num_frame + 1, 4))
         img = numpy.ones((height, width, 3))
         prev_im = None
@@ -65,16 +65,17 @@ class Visualizer(BaseVisualizer):
         x1, y1, x2, y2 = self.get_img_coordinate(3, 1)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        gt_motion = gt_motion_f[0].cpu().data.numpy().transpose(1, 2, 0)
+        gt_motion = gt_motion_f[0].cpu().data.numpy().squeeze()
+        gt_motion = self.label2motion(gt_motion)
         optical_flow = flowlib.visualize_flow(gt_motion, self.m_range)
         x1, y1, x2, y2 = self.get_img_coordinate(3, 2)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        occlude = occlude_f[0].cpu().data.numpy().squeeze()
+        disappear = disappear_f[0].cpu().data.numpy().squeeze()
         cmap = plt.get_cmap('jet')
-        occlude_map = cmap(occlude)[:, :, 0:3]
+        disappear_map = cmap(disappear)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(3, 3)
-        img[y1:y2, x1:x2, :] = occlude_map
+        img[y1:y2, x1:x2, :] = disappear_map
 
         attn = attn_f[0].cpu().data.numpy().squeeze()
         cmap = plt.get_cmap('jet')
@@ -87,16 +88,17 @@ class Visualizer(BaseVisualizer):
         x1, y1, x2, y2 = self.get_img_coordinate(4, 1)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        gt_motion = gt_motion_b[0].cpu().data.numpy().transpose(1, 2, 0)
+        gt_motion = gt_motion_b[0].cpu().data.numpy().squeeze()
+        gt_motion = self.label2motion(gt_motion)
         optical_flow = flowlib.visualize_flow(gt_motion, self.m_range)
         x1, y1, x2, y2 = self.get_img_coordinate(4, 2)
         img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-        occlude = occlude_b[0].cpu().data.numpy().squeeze()
+        disappear = disappear_b[0].cpu().data.numpy().squeeze()
         cmap = plt.get_cmap('jet')
-        occlude_map = cmap(occlude)[:, :, 0:3]
+        disappear_map = cmap(disappear)[:, :, 0:3]
         x1, y1, x2, y2 = self.get_img_coordinate(4, 3)
-        img[y1:y2, x1:x2, :] = occlude_map
+        img[y1:y2, x1:x2, :] = disappear_map
 
         attn = attn_b[0].cpu().data.numpy().squeeze()
         cmap = plt.get_cmap('jet')

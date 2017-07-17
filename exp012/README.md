@@ -1,4 +1,4 @@
-## Bidirectional Model
+## Same as Exp012 But Using Neural Nets to Predict Occlusion
 
 ### Results
 
@@ -39,4 +39,3 @@
 
 ### Take Home Message
 
-- A little complicated

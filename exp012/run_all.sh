@@ -1,57 +1,21 @@
-cd exp01
+cd exp1
 sh train.sh && sh test.sh
 cd ..
-cd exp02
+cd exp2
 sh train.sh && sh test.sh
 cd ..
-cd exp03
+cd exp3
 sh train.sh && sh test.sh
 cd ..
-cd exp04
+cd exp4
 sh train.sh && sh test.sh
 cd ..
-cd exp05
+cd exp5
 sh train.sh && sh test.sh
 cd ..
-cd exp06
+cd exp6
 sh train.sh && sh test.sh
 cd ..
-cd exp07
-sh train.sh && sh test.sh
-cd ..
-cd exp08
-sh train.sh && sh test.sh
-cd ..
-cd exp09
-sh train.sh && sh test.sh
-cd ..
-cd exp10
-sh train.sh && sh test.sh
-cd ..
-cd exp11
-sh train.sh && sh test.sh
-cd ..
-cd exp12
-sh train.sh && sh test.sh
-cd ..
-cd exp13
-sh train.sh && sh test.sh
-cd ..
-cd exp14
-sh train.sh && sh test.sh
-cd ..
-cd exp15
-sh train.sh && sh test.sh
-cd ..
-cd exp16
-sh train.sh && sh test.sh
-cd ..
-cd exp17
-sh train.sh && sh test.sh
-cd ..
-cd exp18
-sh train.sh && sh test.sh
-cd ..
-cd exp19
+cd exp7
 sh train.sh && sh test.sh
 cd ..

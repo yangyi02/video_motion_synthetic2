@@ -59,11 +59,10 @@ class Demo(BaseDemo):
             if torch.cuda.is_available():
                 im_input_f, im_input_b = im_input_f.cuda(), im_input_b.cuda()
                 im_output = im_output.cuda()
-            im_pred, m_mask_f, occlude_f, attn_f, m_mask_b, occlude_b, attn_b, unocclude_all = \
+            im_pred, m_mask_f, disappear_f, attn_f, m_mask_b, disappear_b, attn_b = \
                 self.model(im_input_f, im_input_b)
-            im_diff = (im_pred - im_output) * unocclude_all.expand_as(im_output)
-            im_diff = im_diff / unocclude_all.sum(3).sum(2).expand_as(im_diff)
-            loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
+            im_diff = im_pred - im_output
+            loss = torch.abs(im_diff).sum()
             loss.backward()
             optimizer.step()
 
@@ -103,11 +102,10 @@ class Demo(BaseDemo):
                 im_input_f, im_input_b = im_input_f.cuda(), im_input_b.cuda()
                 im_output = im_output.cuda()
                 gt_motion_f, gt_motion_b = gt_motion_f.cuda(), gt_motion_b.cuda()
-            im_pred, m_mask_f, occlude_f, attn_f, m_mask_b, occlude_b, attn_b, unocclude_all = \
+            im_pred, m_mask_f, disappear_f, attn_f, m_mask_b, disappear_b, attn_b = \
                 self.model(im_input_f, im_input_b)
-            im_diff = (im_pred - im_output) * unocclude_all.expand_as(im_output)
-            im_diff = im_diff / unocclude_all.sum(3).sum(2).expand_as(im_diff)
-            loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
+            im_diff = im_pred - im_output
+            loss = torch.abs(im_diff).sum()
 
             test_loss.append(loss.data[0])
             base_loss.append(torch.abs(im_input_f[:, -3:, :, :] - im_output).sum().data[0])
@@ -122,8 +120,8 @@ class Demo(BaseDemo):
                 flow_f = self.motion2flow(m_mask_f)
                 flow_b = self.motion2flow(m_mask_b)
                 self.visualizer.visualize_result_bidirect(im_input_f, im_input_b, im_output,
-                                                          im_pred, flow_f, gt_motion_f, occlude_f,
-                                                          attn_f, flow_b, gt_motion_b, occlude_b,
+                                                          im_pred, flow_f, gt_motion_f, disappear_f,
+                                                          attn_f, flow_b, gt_motion_b, disappear_b,
                                                           attn_b, 'test_%d.png' % epoch)
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
@@ -156,11 +154,10 @@ class Demo(BaseDemo):
                 im_input_f, im_input_b = im_input_f.cuda(), im_input_b.cuda()
                 im_output = im_output.cuda()
                 gt_motion_f, gt_motion_b = gt_motion_f.cuda(), gt_motion_b.cuda()
-            im_pred, m_mask_f, occlude_f, attn_f, m_mask_b, occlude_b, attn_b, unocclude_all = \
+            im_pred, m_mask_f, disappear_f, attn_f, m_mask_b, disappear_b, attn_b = \
                 self.model_gt(im_input_f, im_input_b, gt_motion_f, gt_motion_b)
-            im_diff = (im_pred - im_output) * unocclude_all.expand_as(im_output)
-            im_diff = im_diff / unocclude_all.sum(3).sum(2).expand_as(im_diff)
-            loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
+            im_diff = im_pred - im_output
+            loss = torch.abs(im_diff).sum()
 
             test_loss.append(loss.data[0])
             base_loss.append(torch.abs(im_input_f[:, -3:, :, :] - im_output).sum().data[0])
@@ -175,8 +172,8 @@ class Demo(BaseDemo):
                 flow_f = self.motion2flow(m_mask_f)
                 flow_b = self.motion2flow(m_mask_b)
                 self.visualizer.visualize_result_bidirect(im_input_f, im_input_b, im_output,
-                                                          im_pred, flow_f, gt_motion_f, occlude_f,
-                                                          attn_f, flow_b, gt_motion_b, occlude_b,
+                                                          im_pred, flow_f, gt_motion_f, disappear_f,
+                                                          attn_f, flow_b, gt_motion_b, disappear_b,
                                                           attn_b, 'test_gt.png')
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))

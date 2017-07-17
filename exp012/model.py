@@ -35,6 +35,8 @@ class Net(nn.Module):
         self.bn11 = nn.BatchNorm2d(num_hidden)
         self.conv = nn.Conv2d(num_hidden, n_class, 3, 1, 1)
 
+        self.conv_d = nn.Conv2d(num_hidden, 1, 3, 1, 1)
+
         self.maxpool = nn.MaxPool2d(2, stride=2, return_indices=False, ceil_mode=False)
         self.upsample = nn.UpsamplingBilinear2d(scale_factor=2)
 
@@ -77,6 +79,7 @@ class Net(nn.Module):
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11(self.conv11(x11)))
         m_mask_f = F.softmax(self.conv(x11))
+        disappear_f = F.sigmoid(self.conv_d(x11))
 
         x = self.bn0(self.conv0(im_input_b))
         x1 = F.relu(self.bn1(self.conv1(x)))
@@ -106,19 +109,15 @@ class Net(nn.Module):
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11(self.conv11(x11)))
         m_mask_b = F.softmax(self.conv(x11))
+        disappear_b = F.sigmoid(self.conv_d(x11))
 
-        seg_f = construct_seg(m_mask_f, self.m_kernel, self.m_range)
-        seg_b = construct_seg(m_mask_b, self.m_kernel, self.m_range)
-        pred_f = construct_image(im_input_f[:, -self.im_channel:, :, :], m_mask_f, self.m_kernel, self.m_range)
-        pred_b = construct_image(im_input_b[:, -self.im_channel:, :, :], m_mask_b, self.m_kernel, self.m_range)
-        conflict_f = torch.abs(seg_f - 1)
-        unocclude_f = F.relu(1 - conflict_f)
-        conflict_b = torch.abs(seg_b - 1)
-        unocclude_b = F.relu(1 - conflict_b)
-        unocclude_all = torch.max(unocclude_f, unocclude_b)
-        attn = (unocclude_f + 1e-5) / (unocclude_f + unocclude_b + 2e-5)
+        seg_f = construct_seg(m_mask_f, disappear_f, self.m_kernel, self.m_range)
+        seg_b = construct_seg(m_mask_b, disappear_b, self.m_kernel, self.m_range)
+        pred_f = construct_image(im_input_f[:, -self.im_channel:, :, :], m_mask_f, disappear_f, self.m_kernel, self.m_range)
+        pred_b = construct_image(im_input_b[:, -self.im_channel:, :, :], m_mask_b, disappear_b, self.m_kernel, self.m_range)
+        attn = (seg_f + 1e-5) / (seg_f + seg_b + 2e-5)
         pred = attn.expand_as(pred_f) * pred_f + (1 - attn.expand_as(pred_b)) * pred_b
-        return pred, m_mask_f, 1 - unocclude_f, attn, m_mask_b, 1 - unocclude_b, 1 - attn, unocclude_all
+        return pred, m_mask_f, disappear_f, attn, m_mask_b, disappear_b, 1 - attn
 
 
 class GtNet(nn.Module):
@@ -163,7 +162,8 @@ class GtNet(nn.Module):
         return m_mask
 
 
-def construct_seg(m_mask, m_kernel, m_range):
+def construct_seg(m_mask, disappear, m_kernel, m_range):
+    m_mask = m_mask * (1 - disappear).expand_as(m_mask)
     seg = Variable(torch.Tensor(m_mask.size(0), 1, m_mask.size(2), m_mask.size(3)))
     if torch.cuda.is_available():
         seg = seg.cuda()
@@ -172,7 +172,8 @@ def construct_seg(m_mask, m_kernel, m_range):
     return seg
 
 
-def construct_image(im, m_mask, m_kernel, m_range):
+def construct_image(im, m_mask, disappear, m_kernel, m_range):
+    im = im * (1 - disappear).expand_as(im)
     pred = Variable(torch.Tensor(im.size()))
     if torch.cuda.is_available():
         pred = pred.cuda()

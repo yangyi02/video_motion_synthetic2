@@ -50,7 +50,7 @@ class Demo(BaseDemo):
             im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
             im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
-            loss = loss + appear.sum() + conflict.sum()
+            # loss = loss + appear.sum() + conflict.sum()
             # loss = torch.abs(im_pred - im_output).sum()
             loss.backward()
             optimizer.step()
@@ -90,7 +90,7 @@ class Demo(BaseDemo):
             im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
             im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
-            loss = loss + appear.sum() + conflict.sum()
+            # loss = loss + appear.sum() + conflict.sum()
             # loss = torch.abs(im_pred - im_output).sum()
 
             test_loss.append(loss.data[0])
@@ -138,7 +138,7 @@ class Demo(BaseDemo):
             im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
             im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
-            loss = loss + appear.sum() + conflict.sum()
+            # loss = loss + appear.sum() + conflict.sum()
             # loss = torch.abs(im_pred - im_output).sum()
 
             test_loss.append(loss.data[0])

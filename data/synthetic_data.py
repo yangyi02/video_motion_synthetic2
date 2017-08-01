@@ -228,7 +228,8 @@ class SyntheticData(object):
             x1, y1, x2, y2 = self.visualizer.get_img_coordinate(3, i + 1)
             img[y1:y2, x1:x2, :] = optical_flow / 255.0
 
-            seg = seg_layer[0, i, :, :, :].squeeze() * 1.0 / seg_layer[0, i, :, :, :].max().astype(numpy.float)
+            seg_max = seg_layer[0, i, :, :, :].max()
+            seg = seg_layer[0, i, :, :, :].squeeze() * 1.0 / seg_max
             cmap = plt.get_cmap('jet')
             seg_map = cmap(seg)[:, :, 0:3]
             x1, y1, x2, y2 = self.visualizer.get_img_coordinate(4, i + 1)

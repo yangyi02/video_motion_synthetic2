@@ -1,4 +1,4 @@
-[INFO 2017-07-16 22:54:51,206 demo.py:167] Namespace(batch_size=64, bg_move=True, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='./model.pth', learning_rate=0.001, method='unsupervised', motion_range=1, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=True, test_epoch=10, test_gt=False, test_interval=100, train=False, train_epoch=1000)
-[INFO 2017-07-16 22:54:55,017 demo.py:111] average test loss: 135.42, base loss: 27923.60
-[INFO 2017-07-16 22:54:55,017 demo.py:112] improve_loss: 27788.18, improve_percent: 1.00
-[INFO 2017-07-16 22:54:55,018 demo.py:114] average test endpoint error: 0.03
+[INFO 2017-07-31 17:13:51,733 demo.py:182] Namespace(batch_size=64, bg_move=True, bg_noise=0.5, bidirection=False, data='box', display=True, fg_noise=0.1, image_size=32, init_model_path='./model.pth', learning_rate=0.001, method='unsupervised', motion_range=1, num_frame=3, num_objects=1, save_dir='./', save_display=True, save_display_dir='./', test=True, test_epoch=10, test_gt=False, test_interval=100, train=False, train_epoch=1000)
+[INFO 2017-07-31 17:13:55,867 demo.py:119] average test loss: 69.82, base loss: 27349.95
+[INFO 2017-07-31 17:13:55,868 demo.py:120] improve_loss: 27280.14, improve_percent: 1.00
+[INFO 2017-07-31 17:13:55,868 demo.py:122] average test endpoint error: 0.00

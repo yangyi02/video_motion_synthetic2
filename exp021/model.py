@@ -61,12 +61,6 @@ class Net(nn.Module):
         self.bn11_d = nn.BatchNorm2d(num_hidden)
         self.conv_depth = nn.Conv2d(num_hidden, 1, 3, 1, 1)
 
-        self.conv_o1 = nn.Conv2d(2 * n_class, num_hidden, 3, 1, 1)
-        self.bn_o1 = nn.BatchNorm2d(num_hidden)
-        self.conv_o2 = nn.Conv2d(num_hidden, num_hidden, 3, 1, 1)
-        self.bn_o2 = nn.BatchNorm2d(num_hidden)
-        self.conv_o = nn.Conv2d(num_hidden, n_class, 3, 1, 1)
-
         self.maxpool = nn.MaxPool2d(2, stride=2, return_indices=False, ceil_mode=False)
         self.upsample = nn.UpsamplingBilinear2d(scale_factor=2)
 
@@ -81,7 +75,7 @@ class Net(nn.Module):
         if torch.cuda.is_available():
             self.m_kernel = self.m_kernel.cuda()
 
-    def forward(self, im_input):
+    def forward(self, im_input, im_output):
         x = self.bn0(self.conv0(im_input))
         x1 = F.relu(self.bn1(self.conv1(x)))
         x2 = self.maxpool(x1)
@@ -109,8 +103,7 @@ class Net(nn.Module):
         x10 = self.upsample(x10)
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11(self.conv11(x11)))
-        motion_feature = self.conv(x11)
-        m_mask = F.softmax(motion_feature)
+        m_mask = F.softmax(self.conv(x11))
 
         im = im_input[:, -self.im_channel:, :, :]
         x = self.bn0_d(self.conv0_d(im))
@@ -140,33 +133,45 @@ class Net(nn.Module):
         x10 = self.upsample(x10)
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11_d(self.conv11_d(x11)))
-        depth_feature = self.conv_depth(x11)
-        depth = F.sigmoid(depth_feature)
+        depth = F.sigmoid(self.conv_depth(x11))
 
         mask = F.conv2d(m_mask, self.m_kernel, None, 1, self.m_range, 1, self.m_kernel.size(0))
-        appear = F.relu(1 - mask.sum(1))
+        occl = seg2occl(depth, mask, self.m_kernel, self.m_range)
+        pred, unocclude = construct_image(im, mask, occl, self.m_kernel, self.m_range)
+        appear = F.relu(1 - unocclude.sum(1))
+        conflict = F.relu(unocclude.sum(1) - 1)
 
-        nearby_motion = F.conv2d(motion_feature, self.m_kernel, None, 1, self.m_range, 1, self.m_kernel.size(0))
-        depth_expand = depth_feature.expand_as(mask)
-        nearby_depth = F.conv2d(depth_expand, self.m_kernel, None, 1, self.m_range, 1, self.m_kernel.size(0))
-        occl = torch.cat((nearby_depth, nearby_motion), 1)
-        occl = F.relu(self.bn_o1(self.conv_o1(occl)))
-        # occl = F.relu(self.conv_o2(occl))
-        occl = F.sigmoid(self.conv_o(occl))
-        # attn = F.softmax(self.conv_o(occl))
+        x = self.bn0_d(self.conv0_d(im_output))
+        x1 = F.relu(self.bn1_d(self.conv1_d(x)))
+        x2 = self.maxpool(x1)
+        x2 = F.relu(self.bn2_d(self.conv2_d(x2)))
+        x3 = self.maxpool(x2)
+        x3 = F.relu(self.bn3_d(self.conv3_d(x3)))
+        x4 = self.maxpool(x3)
+        x4 = F.relu(self.bn4_d(self.conv4_d(x4)))
+        x5 = self.maxpool(x4)
+        x5 = F.relu(self.bn5_d(self.conv5_d(x5)))
+        x6 = self.maxpool(x5)
+        x6 = F.relu(self.bn6_d(self.conv6_d(x6)))
+        x6 = self.upsample(x6)
+        x7 = torch.cat((x6, x5), 1)
+        x7 = F.relu(self.bn7_d(self.conv7_d(x7)))
+        x7 = self.upsample(x7)
+        x8 = torch.cat((x7, x4), 1)
+        x8 = F.relu(self.bn8_d(self.conv8_d(x8)))
+        x8 = self.upsample(x8)
+        x9 = torch.cat((x8, x3), 1)
+        x9 = F.relu(self.bn9_d(self.conv9_d(x9)))
+        x9 = self.upsample(x9)
+        x10 = torch.cat((x9, x2), 1)
+        x10 = F.relu(self.bn10_d(self.conv10_d(x10)))
+        x10 = self.upsample(x10)
+        x11 = torch.cat((x10, x1), 1)
+        x11 = F.relu(self.bn11_d(self.conv11_d(x11)))
+        depth_out = F.sigmoid(self.conv_depth(x11))
 
-        im = im_input[:, -self.im_channel:, :, :]
-        pred = Variable(torch.Tensor(im.size()))
-        if torch.cuda.is_available():
-            pred = pred.cuda()
-        for i in range(im.size(1)):
-            im_expand = im[:, i, :, :].unsqueeze(1).expand_as(mask)
-            nearby_im = F.conv2d(im_expand, self.m_kernel, None, 1, self.m_range, 1, self.m_kernel.size(0))
-            pred[:, i, :, :] = (nearby_im * mask * occl).sum(1)
-        # appear = F.relu(1 - (mask * occl).sum(1))
-        conflict = F.relu((mask * occl).sum(1) - 1)
-
-        return pred, m_mask, depth, appear, conflict
+        pred_depth, _ = construct_image(depth, mask, occl, self.m_kernel, self.m_range)
+        return pred, m_mask, depth, appear, conflict, pred_depth, depth_out
 
 
 class GtNet(nn.Module):
@@ -182,7 +187,7 @@ class GtNet(nn.Module):
         if torch.cuda.is_available():
             self.m_kernel = self.m_kernel.cuda()
 
-    def forward(self, im_input, gt_motion, depth):
+    def forward(self, im_input, im_output, gt_motion, depth, depth_out):
         m_mask = self.label2mask(gt_motion, self.n_class)
         mask = F.conv2d(m_mask, self.m_kernel, None, 1, self.m_range, 1, self.m_kernel.size(0))
         occl = seg2occl(depth, mask, self.m_kernel, self.m_range)
@@ -190,7 +195,8 @@ class GtNet(nn.Module):
         pred, unocclude = construct_image(im, mask, occl, self.m_kernel, self.m_range)
         appear = F.relu(1 - unocclude.sum(1))
         conflict = F.relu(unocclude.sum(1) - 1)
-        return pred, m_mask, depth, appear, conflict
+        pred_depth, _ = construct_image(depth, mask, occl, self.m_kernel, self.m_range)
+        return pred, m_mask, depth, appear, conflict, pred_depth, depth_out
 
     def label2mask(self, motion, n_class):
         m_mask = Variable(torch.Tensor(motion.size(0), n_class, motion.size(2), motion.size(3)))

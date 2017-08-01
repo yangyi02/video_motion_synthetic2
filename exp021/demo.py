@@ -46,12 +46,16 @@ class Demo(BaseDemo):
             im_output = Variable(torch.from_numpy(im_output).float())
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
-            im_pred, m_mask, depth, appear, conflict = self.model(im_input)
+            im_pred, m_mask, depth, appear, conflict, pred_depth, depth_out = self.model(im_input, im_output)
             im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
             im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
+            depth_diff = (1 - appear).expand_as(depth_out) * (pred_depth - depth_out)
+            depth_diff = depth_diff / (1 - appear).sum(3).sum(2).expand_as(depth_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
-            # loss = loss + appear.sum() + conflict.sum()
-            # loss = torch.abs(im_pred - im_output).sum()
+            loss = loss + torch.abs(depth_diff).sum() * im_diff.size(2) * im_diff.size(3)
+            a = torch.abs(m_mask[:, :, :-1, :] - m_mask[:, :, 1:, :]).sum(1) * (1 - torch.abs(depth[:, :, :-1, :] - depth[:, :, 1:, :]))
+            b = torch.abs(m_mask[:, :, :, :-1] - m_mask[:, :, :, 1:]).sum(1) * (1 - torch.abs(depth[:, :, :, :-1] - depth[:, :, :, 1:]))
+            loss = loss + 0.1 * (a.sum() + b.sum())
             loss.backward()
             optimizer.step()
 
@@ -86,12 +90,16 @@ class Demo(BaseDemo):
                 im_input, im_output = im_input.cuda(), im_output.cuda()
                 gt_motion = gt_motion.cuda()
                 gt_depth = gt_depth.cuda()
-            im_pred, m_mask, depth, appear, conflict = self.model(im_input)
+            im_pred, m_mask, depth, appear, conflict, pred_depth, depth_out = self.model(im_input, im_output)
             im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
             im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
+            depth_diff = (1 - appear).expand_as(depth_out) * (pred_depth - depth_out)
+            depth_diff = depth_diff / (1 - appear).sum(3).sum(2).expand_as(depth_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
-            # loss = loss + appear.sum() + conflict.sum()
-            # loss = torch.abs(im_pred - im_output).sum()
+            loss = loss + torch.abs(depth_diff).sum() * im_diff.size(2) * im_diff.size(3)
+            a = torch.abs(m_mask[:, :, :-1, :] - m_mask[:, :, 1:, :]).sum(1) * (1 - torch.abs(depth[:, :, :-1, :] - depth[:, :, 1:, :]))
+            b = torch.abs(m_mask[:, :, :, :-1] - m_mask[:, :, :, 1:]).sum(1) * (1 - torch.abs(depth[:, :, :, :-1] - depth[:, :, :, 1:]))
+            loss = loss + 0.1 * (a.sum() + b.sum())
 
             test_loss.append(loss.data[0])
             base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
@@ -123,23 +131,30 @@ class Demo(BaseDemo):
             im_output = im[:, -1, :, :, :]
             gt_motion = motion[:, -2, :, :, :]
             gt_motion_label = motion_label[:, -2, :, :, :]
-            gt_depth = gt_depth[:, -2, :, :, :]
+            gt_depth_in = gt_depth[:, -2, :, :, :]
+            gt_depth_out = gt_depth[:, -1, :, :, :]
             im_input = Variable(torch.from_numpy(im_input).float())
             im_output = Variable(torch.from_numpy(im_output).float())
             gt_motion = Variable(torch.from_numpy(gt_motion).float())
             gt_motion_label = Variable(torch.from_numpy(gt_motion_label))
-            gt_depth = Variable(torch.from_numpy(gt_depth).float())
+            gt_depth_in = Variable(torch.from_numpy(gt_depth_in).float())
+            gt_depth_out = Variable(torch.from_numpy(gt_depth_out).float())
             if torch.cuda.is_available():
                 im_input, im_output = im_input.cuda(), im_output.cuda()
                 gt_motion = gt_motion.cuda()
                 gt_motion_label = gt_motion_label.cuda()
-                gt_depth = gt_depth.cuda()
-            im_pred, m_mask, depth, appear, conflict = self.model_gt(im_input, gt_motion_label, gt_depth)
+                gt_depth_in = gt_depth_in.cuda()
+                gt_depth_out = gt_depth_out.cuda()
+            im_pred, m_mask, depth, appear, conflict, pred_depth, depth_out = self.model_gt(im_input, im_output, gt_motion_label, gt_depth_in, gt_depth_out)
             im_diff = (1 - appear).expand_as(im_output) * (im_pred - im_output)
             im_diff = im_diff / (1 - appear).sum(3).sum(2).expand_as(im_diff)
+            depth_diff = (1 - appear).expand_as(depth_out) * (pred_depth - depth_out)
+            depth_diff = depth_diff / (1 - appear).sum(3).sum(2).expand_as(depth_diff)
             loss = torch.abs(im_diff).sum() * im_diff.size(2) * im_diff.size(3)
-            # loss = loss + appear.sum() + conflict.sum()
-            # loss = torch.abs(im_pred - im_output).sum()
+            loss = loss + torch.abs(depth_diff).sum() * im_diff.size(2) * im_diff.size(3)
+            a = torch.abs(m_mask[:, :, :-1, :] - m_mask[:, :, 1:, :]).sum(1) * (1 - torch.abs(depth[:, :, :-1, :] - depth[:, :, 1:, :]))
+            b = torch.abs(m_mask[:, :, :, :-1] - m_mask[:, :, :, 1:]).sum(1) * (1 - torch.abs(depth[:, :, :, :-1] - depth[:, :, :, 1:]))
+            loss = loss + 0.1 * (a.sum() + b.sum())
 
             test_loss.append(loss.data[0])
             base_loss.append(torch.abs(im_input[:, -3:, :, :] - im_output).sum().data[0])
@@ -150,7 +165,7 @@ class Demo(BaseDemo):
             test_epe.append(epe.cpu().data[0])
             if self.display:
                 self.visualizer.visualize_result(im_input, im_output, im_pred, flow, gt_motion,
-                                                 depth, gt_depth, appear, conflict, 'test_gt.png')
+                                                 depth, gt_depth_in, appear, conflict, 'test_gt.png')
         test_loss = numpy.mean(numpy.asarray(test_loss))
         base_loss = numpy.mean(numpy.asarray(base_loss))
         improve_loss = base_loss - test_loss

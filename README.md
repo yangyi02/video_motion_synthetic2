@@ -25,6 +25,7 @@
 | 018  | 0.05 | 0.04 | 0.04 | 0.02 | 0.08 | 0.03 | 0.12 | 0.16 | 0.09 | 0.06 | 0.13 | 0.38 | 015  | Bad  | Predict depth using only one image |
 | 019  | 0.00 | 0.05 | 0.00 | 0.06 | 0.07 | 0.07 | 0.01 | 0.07 | 0.02 | 0.06 | 0.22 | 0.21 | 018  | Good | Add segmentation temporal consistency loss |
 | 020  | 0.00 | 0.04 | 0.01 | 0.03 | 0.09 | 0.08 | 0.03 | 0.07 | 0.02 | 0.06 | 0.20 | 0.18 | 019  | Good | Bidirectional model |
+| 021  | 0.00 | 0.01 | 0.00 | 0.02 | 0.06 | 0.03 | 0.02 | 0.03 | 0.01 | 0.05 | 0.22 | 0.17 | 019  | Good | Add flow smoothness loss |
 | 000  | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 000  |      | |
 
 | Exp  | 01   | 02   | 03   | 04   | 05   | 06   | 07   | 08   | 09   | 10   | 11   | 12   | Comp | Eval | Note |
@@ -32,10 +33,7 @@
 | 001  | 0.07 | 0.07 | 0.08 | 0.09 | 0.15 | 0.14 | 0.11 | 0.13 | 0.18 | 0.22 | 0.26 | 0.26 |      | Good | The simplest baseline |
 | 002  | 0.01 | 0.01 | 0.03 | 0.06 | 0.08 | 0.04 | 0.04 | 0.03 | 0.12 | 0.19 | 0.18 | 0.12 | 001  | Good | Moving pixel occlude static pixel |
 | 006-1| 0.00 | 0.01 | 0.02 | 0.05 | 0.05 | 0.03 | 0.01 | 0.02 | 0.10 | 0.19 | 0.09 | 0.08 | 002  | Good | Old pixel loss divided by total number of old pixels |
-| 006  | 0.02 | 0.02 | 0.02 | 0.04 | 0.06 | 0.05 | 0.08 | 0.03 | 0.06 | 0.10 | 0.15 | 0.12 | 005-1| Good | Old pixel loss divided by total number of old pixels | 
-| 011  | 0.01 | 0.01 | 0.02 | 0.04 | 0.06 | 0.04 | 0.04 | 0.03 | 0.07 | 0.12 | 0.12 | 0.11 | 006  | Good | Wider network |
-| 015  | 0.02 | 0.03 | 0.03 | 0.03 | 0.15 | 0.05 | 0.11 | 0.12 | 0.04 | 0.06 | 0.17 | 0.38 | 014  | Good | Old pixel loss divided by total number of old pixels |
-| 008-1| 0.01 | 0.01 | 0.01 | 0.03 | 0.05 | 0.03 | 0.03 | 0.04 | 0.12 | 0.05 | 0.12 | 0.13 | 008  | Good | Extra loss for total number of new and conflicting pixels |
+| 021  | 0.00 | 0.01 | 0.00 | 0.02 | 0.06 | 0.03 | 0.02 | 0.03 | 0.01 | 0.05 | 0.22 | 0.17 | 019  | Good | Add flow smoothness loss |
 
 
 ### Take Home Message

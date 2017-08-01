@@ -139,7 +139,8 @@ class Net(nn.Module):
         mask = F.conv2d(m_mask, self.m_kernel, None, 1, self.m_range, 1, self.m_kernel.size(0))
         occl = seg2occl(depth, mask, self.m_kernel, self.m_range)
         pred, unocclude = construct_image(im, mask, occl, self.m_kernel, self.m_range)
-        appear = F.relu(1 - unocclude.sum(1))
+        # appear = F.relu(1 - unocclude.sum(1))
+        appear = F.relu(1 - mask.sum(1))
         conflict = F.relu(unocclude.sum(1) - 1)
 
         x = self.bn0_d(self.conv0_d(im_output))
@@ -169,7 +170,7 @@ class Net(nn.Module):
         x10 = self.upsample(x10)
         x11 = torch.cat((x10, x1), 1)
         x11 = F.relu(self.bn11_d(self.conv11_d(x11)))
-        depth_out = F.sigmoid(self.conv_depth(x11)) * 2 + F.sigmoid(self.conv_depth2(x11))
+        depth_out = F.sigmoid(self.conv_depth1(x11)) * 2 + F.sigmoid(self.conv_depth2(x11))
 
         pred_depth, _ = construct_image(depth, mask, occl, self.m_kernel, self.m_range)
         return pred, m_mask, depth, appear, conflict, pred_depth, depth_out
